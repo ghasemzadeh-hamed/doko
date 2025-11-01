@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/Refund/';
+const API_ENDPOINT = '/Refund/';
 
 const RefundComponent = () => {
   const [refunds, setRefunds] = useState([]);
@@ -18,7 +18,7 @@ const RefundComponent = () => {
 
   const fetchRefunds = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setRefunds(response.data);
     } catch (error) {
       console.error('Error fetching refunds:', error);
@@ -27,7 +27,7 @@ const RefundComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newRefund);
+      await apiClient.post(API_ENDPOINT, newRefund);
       fetchRefunds();
       setNewRefund({
         customer: '',
@@ -45,7 +45,7 @@ const RefundComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingRefund.id}/`, editingRefund);
+      await apiClient.put(`${API_ENDPOINT}${editingRefund.id}/`, editingRefund);
       fetchRefunds();
       setEditingRefund(null);
     } catch (error) {
@@ -55,7 +55,7 @@ const RefundComponent = () => {
 
   const handleDelete = async (refundId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${refundId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${refundId}/`);
       fetchRefunds();
     } catch (error) {
       console.error('Error deleting refund:', error);

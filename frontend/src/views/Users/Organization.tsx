@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const OrganizationComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const OrganizationComponent = () => {
 
   const fetchOrganizations = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/managers/');
+      const response = await apiClient.get('/managers/');
       setOrganizations(response.data);
     } catch (error) {
       console.error('Error fetching organizations:', error);
@@ -39,7 +39,7 @@ const OrganizationComponent = () => {
   const handleUpdate = async () => {
     try {
       // Update existing organization
-      const response = await axios.put(`http://localhost:8000/managers/${editingOrganization.id}/`, editingOrganization);
+      const response = await apiClient.put(`/managers/${editingOrganization.id}/`, editingOrganization);
       console.log('Organization updated successfully:', response.data);
 
       fetchOrganizations(); // Fetch organizations again after updating
@@ -51,7 +51,7 @@ const OrganizationComponent = () => {
 
   const handleDelete = async (organizationId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/managers/${organizationId}/`);
+      const response = await apiClient.delete(`/managers/${organizationId}/`);
       console.log('Organization deleted successfully:', response.data);
       fetchOrganizations(); // Fetch organizations again after deletion
     } catch (error) {

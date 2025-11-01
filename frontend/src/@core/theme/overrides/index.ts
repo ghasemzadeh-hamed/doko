@@ -53,6 +53,7 @@ const Overrides = (theme: Theme) => {
   const accordion = MuiAccordion(theme)
   const pagination = MuiPagination(theme)
   const dateTimePicker = MuiDateTimePicker(theme)
+  const paper = MuiPaper(theme)
 
   return Object.assign(
     chip,
@@ -72,7 +73,7 @@ const Overrides = (theme: Theme) => {
     popover,
     tooltip,
     backdrop,
-    MuiPaper,
+    paper,
     snackbar,
     switches,
     timeline,

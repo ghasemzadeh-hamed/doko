@@ -1,5 +1,6 @@
 import React from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface DeleteAddressProps {
   addressId: number;
@@ -8,8 +9,9 @@ interface DeleteAddressProps {
 const DeleteAddress: React.FC<DeleteAddressProps> = ({ addressId }) => {
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/addresses/${addressId}/`);
+      const response = await apiClient.delete(`/addresses/${addressId}/`);
       console.log('Address deleted successfully:', response.data);
+
       // You can perform additional actions after deleting the address
     } catch (error) {
       console.error('Error deleting address:', error);

@@ -1,7 +1,7 @@
-
 // components/EditAddress.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditAddressProps {
   addressId: number;
@@ -22,7 +22,7 @@ const EditAddress: React.FC<EditAddressProps> = ({ addressId }) => {
   });
 
   useEffect(() => {
-    axios.get<Address>(`http://localhost:8000/addresses/${addressId}/`)
+    apiClient.get<Address>(`/addresses/${addressId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -49,8 +49,9 @@ const EditAddress: React.FC<EditAddressProps> = ({ addressId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/addresses/${addressId}/`, formData);
+      const response = await apiClient.put(`/addresses/${addressId}/`, formData);
       console.log('Address updated successfully:', response.data);
+
       // You can perform additional actions after updating the address
     } catch (error) {
       console.error('Error updating address:', error);

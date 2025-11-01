@@ -1,5 +1,6 @@
 // components/DocumentList.tsx
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import Link from 'next/link';
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 
@@ -18,7 +19,7 @@ const DocumentList: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
 
   useEffect(() => {
-    axios.get<Document[]>('http://localhost:8000/Document/')
+    apiClient.get<Document[]>('/Document/')
       .then(response => {
         setDocuments(response.data);
       })

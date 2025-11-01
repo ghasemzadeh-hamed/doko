@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/Debt/';
+const API_ENDPOINT = '/Debt/';
 
 const DebtComponent = () => {
   const [debts, setDebts] = useState([]);
@@ -20,7 +20,7 @@ const DebtComponent = () => {
 
   const fetchDebts = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setDebts(response.data);
     } catch (error) {
       console.error('Error fetching debts:', error);
@@ -29,7 +29,7 @@ const DebtComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newDebt);
+      await apiClient.post(API_ENDPOINT, newDebt);
       fetchDebts();
       setNewDebt({
         seller: '',
@@ -49,7 +49,7 @@ const DebtComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingDebt.id}/`, editingDebt);
+      await apiClient.put(`${API_ENDPOINT}${editingDebt.id}/`, editingDebt);
       fetchDebts();
       setEditingDebt(null);
     } catch (error) {
@@ -59,7 +59,7 @@ const DebtComponent = () => {
 
   const handleDelete = async (debtId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${debtId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${debtId}/`);
       fetchDebts();
     } catch (error) {
       console.error('Error deleting debt:', error);

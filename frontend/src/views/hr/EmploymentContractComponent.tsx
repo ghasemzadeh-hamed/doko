@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface EmploymentContractData {
@@ -15,7 +16,7 @@ const EmploymentContractComponent: React.FC = () => {
   const [contracts, setContracts] = useState<EmploymentContractData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/EmploymentContract/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/EmploymentContract/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setContracts(response.data);
       })

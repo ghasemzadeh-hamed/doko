@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface LeaveData {
@@ -7,6 +8,7 @@ interface LeaveData {
   startDate: string;
   endDate: string;
   duration: string;
+
   // اضافه کردن سایر فیلدهای مورد نیاز
 }
 
@@ -14,7 +16,7 @@ const LeaveComponent: React.FC = () => {
   const [leaves, setLeaves] = useState<LeaveData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/Leave/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/Leave/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setLeaves(response.data);
       })

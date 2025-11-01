@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ProductDetailComponent = () => {
   // ** State
@@ -27,7 +27,7 @@ const ProductDetailComponent = () => {
 
   const fetchProductDetails = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/ProductDetail/');
+      const response = await apiClient.get('/ProductDetail/');
       setProductDetails(response.data);
     } catch (error) {
       console.error('Error fetching product details:', error);
@@ -36,7 +36,7 @@ const ProductDetailComponent = () => {
 
   const fetchProductDetailNames = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/ProductDetailName/');
+      const response = await apiClient.get('/ProductDetailName/');
       setProductDetailNames(response.data);
     } catch (error) {
       console.error('Error fetching product detail names:', error);
@@ -49,7 +49,7 @@ const ProductDetailComponent = () => {
 
   const handleDelete = async (productDetailId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/ProductDetail/${productDetailId}/`);
+      const response = await apiClient.delete(`/ProductDetail/${productDetailId}/`);
       console.log('Product detail deleted successfully:', response.data);
       fetchProductDetails(); // Fetch product details again after deletion
     } catch (error) {
@@ -61,14 +61,14 @@ const ProductDetailComponent = () => {
     try {
       if (editingProductDetail) {
         // Update existing product detail
-        const response = await axios.put(`http://localhost:8000/ProductDetail/${editingProductDetail.id}/`, editingProductDetail);
+        const response = await apiClient.put(`/ProductDetail/${editingProductDetail.id}/`, editingProductDetail);
         console.log('Product detail updated successfully:', response.data);
       } else {
         // Create new product detail
         const newProductDetail = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/ProductDetail/', newProductDetail);
+        const response = await apiClient.post('/ProductDetail/', newProductDetail);
         console.log('New product detail added successfully:', response.data);
       }
 

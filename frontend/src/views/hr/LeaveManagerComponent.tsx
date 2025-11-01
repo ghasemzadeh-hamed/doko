@@ -1,6 +1,7 @@
 //
 // import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
+// import apiClient from 'src/services/apiClient';
+
 // import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button } from '@mui/material';
 //
 //
@@ -21,7 +22,7 @@
 //
 //   useEffect(() => {
 //     // فرض بر این است که API شما داده‌های مرخصی را برمی‌گرداند
-//     axios.get('http://127.0.0.1:8000/LeaveManager/')
+//     apiClient.get('/LeaveManager/')
 //       .then(response => {
 //         setLeaves(response.data);
 //       })

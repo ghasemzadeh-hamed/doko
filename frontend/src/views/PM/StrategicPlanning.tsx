@@ -11,9 +11,9 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/StrategicPlanning/';
+const API_ENDPOINT = '/StrategicPlanning/';
 
 const StrategicPlanningComponent = () => {
   // ** State
@@ -27,7 +27,7 @@ const StrategicPlanningComponent = () => {
 
   const fetchStrategicPlannings = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setStrategicPlannings(response.data);
     } catch (error) {
       console.error('Error fetching strategic plannings:', error);
@@ -40,7 +40,7 @@ const StrategicPlanningComponent = () => {
 
   const handleDelete = async (strategicPlanningId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${strategicPlanningId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${strategicPlanningId}/`);
       console.log('Strategic planning deleted successfully');
       fetchStrategicPlannings(); // Fetch strategic plannings again after deletion
     } catch (error) {
@@ -52,14 +52,14 @@ const StrategicPlanningComponent = () => {
     try {
       if (editingStrategicPlanning) {
         // Update existing strategic planning
-        await axios.put(`${API_ENDPOINT}${editingStrategicPlanning.id}/`, editingStrategicPlanning);
+        await apiClient.put(`${API_ENDPOINT}${editingStrategicPlanning.id}/`, editingStrategicPlanning);
         console.log('Strategic planning updated successfully');
       } else {
         // Create new strategic planning
         const newStrategicPlanning = {
           // Add other fields as needed
         };
-        await axios.post(API_ENDPOINT, newStrategicPlanning);
+        await apiClient.post(API_ENDPOINT, newStrategicPlanning);
         console.log('New strategic planning added successfully');
       }
 

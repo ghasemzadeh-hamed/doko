@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AttachmentsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const AttachmentsComponent = () => {
 
   const fetchAttachments = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Attachments/');
+      const response = await apiClient.get('/Attachments/');
       setAttachments(response.data);
     } catch (error) {
       console.error('Error fetching attachments:', error);
@@ -38,7 +38,7 @@ const AttachmentsComponent = () => {
 
   const handleDelete = async (attachmentId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Attachments/${attachmentId}/`);
+      const response = await apiClient.delete(`/Attachments/${attachmentId}/`);
       console.log('Attachment deleted successfully:', response.data);
       fetchAttachments(); // Fetch attachments again after deletion
     } catch (error) {
@@ -50,15 +50,16 @@ const AttachmentsComponent = () => {
     try {
       if (editingAttachment) {
         // Update existing attachment
-        const response = await axios.put(`http://localhost:8000/Attachments/${editingAttachment.id}/`, editingAttachment);
+        const response = await apiClient.put(`/Attachments/${editingAttachment.id}/`, editingAttachment);
         console.log('Attachment updated successfully:', response.data);
       } else {
         // Create new attachment
         const newAttachment = {
           file_name: '',
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Attachments/', newAttachment);
+        const response = await apiClient.post('/Attachments/', newAttachment);
         console.log('New attachment added successfully:', response.data);
       }
 

@@ -15,7 +15,8 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // ** Your Custom Address, assuming it's already implemented
 // import AddressComponent from './AddressComponent';
@@ -33,7 +34,7 @@ const ProfileComponent = () => {
 
   const fetchProfiles = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Profile/');
+      const response = await apiClient.get('/Profile/');
       setProfiles(response.data);
     } catch (error) {
       console.error('Error fetching profiles:', error);
@@ -46,7 +47,7 @@ const ProfileComponent = () => {
 
   const handleDelete = async (profileId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Profile/${profileId}/`);
+      const response = await apiClient.delete(`/Profile/${profileId}/`);
       console.log('Profile deleted successfully:', response.data);
       fetchProfiles(); // Fetch profiles again after deletion
     } catch (error) {
@@ -58,12 +59,12 @@ const ProfileComponent = () => {
     try {
       if (editingProfile) {
         // Update existing profile
-        const response = await axios.put(`http://localhost:8000/Profile/${editingProfile.id}/`, editingProfile);
+        const response = await apiClient.put(`/Profile/${editingProfile.id}/`, editingProfile);
         console.log('Profile updated successfully:', response.data);
       } else {
         // Create new profile
         const newProfile = { role: 'USER', has_sales_access: false, has_marketing_access: false, has_services_access: false, has_utilities_access: false, is_organization_admin: false, is_active: false, date_of_joining: null, user: null, address: [] };
-        const response = await axios.post('http://localhost:8000/Profile/', newProfile);
+        const response = await apiClient.post('/Profile/', newProfile);
         console.log('New profile added successfully:', response.data);
       }
 

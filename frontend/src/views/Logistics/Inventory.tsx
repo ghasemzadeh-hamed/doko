@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const InventoryComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const InventoryComponent = () => {
 
   const fetchInventory = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Inventory/');
+      const response = await apiClient.get('/Inventory/');
       setInventory(response.data);
     } catch (error) {
       console.error('Error fetching inventory:', error);
@@ -38,7 +38,7 @@ const InventoryComponent = () => {
 
   const handleDelete = async (inventoryItemId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Inventory/${inventoryItemId}/`);
+      const response = await apiClient.delete(`/Inventory/${inventoryItemId}/`);
       console.log('Inventory item deleted successfully:', response.data);
       fetchInventory(); // Fetch inventory again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const InventoryComponent = () => {
     try {
       if (editingInventory) {
         // Update existing inventory item
-        const response = await axios.put(`http://localhost:8000/Inventory/${editingInventory.id}/`, editingInventory);
+        const response = await apiClient.put(`/Inventory/${editingInventory.id}/`, editingInventory);
         console.log('Inventory item updated successfully:', response.data);
       } else {
         // Create new inventory item
         const newInventoryItem = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Inventory/', newInventoryItem);
+        const response = await apiClient.post('/Inventory/', newInventoryItem);
         console.log('New inventory item added successfully:', response.data);
       }
 

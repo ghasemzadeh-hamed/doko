@@ -12,7 +12,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const UnitComponent = () => {
   // ** State
@@ -26,7 +26,7 @@ const UnitComponent = () => {
 
   const fetchUnits = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Unit/');
+      const response = await apiClient.get('/Unit/');
       setUnits(response.data);
     } catch (error) {
       console.error('Error fetching units:', error);
@@ -39,7 +39,7 @@ const UnitComponent = () => {
 
   const handleDelete = async (unitId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Unit/${unitId}/`);
+      const response = await apiClient.delete(`/Unit/${unitId}/`);
       console.log('Unit deleted successfully:', response.data);
       fetchUnits(); // Fetch units again after deletion
     } catch (error) {
@@ -51,14 +51,14 @@ const UnitComponent = () => {
     try {
       if (editingUnit) {
         // Update existing unit
-        const response = await axios.put(`http://localhost:8000/Unit/${editingUnit.id}/`, editingUnit);
+        const response = await apiClient.put(`/Unit/${editingUnit.id}/`, editingUnit);
         console.log('Unit updated successfully:', response.data);
       } else {
         // Create new unit
         const newUnit = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Unit/', newUnit);
+        const response = await apiClient.post('/Unit/', newUnit);
         console.log('New unit added successfully:', response.data);
       }
 

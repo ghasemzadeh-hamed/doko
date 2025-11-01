@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditLocationProps {
   locationId: number;
@@ -15,7 +16,7 @@ const EditLocation: React.FC<EditLocationProps> = ({ locationId }) => {
   });
 
   useEffect(() => {
-    axios.get<Location>(`http://localhost:8000/location/${locationId}/`)
+    apiClient.get<Location>(`/location/${locationId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -35,8 +36,9 @@ const EditLocation: React.FC<EditLocationProps> = ({ locationId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/location/${locationId}/`, formData);
+      const response = await apiClient.put(`/location/${locationId}/`, formData);
       console.log('Location updated successfully:', response.data);
+
       // You can perform additional actions after updating the location
     } catch (error) {
       console.error('Error updating location:', error);

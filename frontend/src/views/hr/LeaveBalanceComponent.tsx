@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -19,7 +20,7 @@ const LeaveBalanceComponent: React.FC = () => {
   const [leaveBalances, setLeaveBalances] = useState<LeaveBalanceData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/LeaveBalance/')
+    apiClient.get('/LeaveBalance/')
       .then(response => {
         setLeaveBalances(response.data);
       })

@@ -2,7 +2,7 @@
 import { ReactNode } from 'react'
 
 // ** MUI Imports
-import { styled, useTheme } from '@mui/material/styles'
+import { styled, useTheme, alpha } from '@mui/material/styles'
 import MuiSwipeableDrawer, { SwipeableDrawerProps } from '@mui/material/SwipeableDrawer'
 
 // ** Type Import
@@ -65,12 +65,23 @@ const Drawer = (props: Props) => {
       className='layout-vertical-nav'
       variant={hidden ? 'temporary' : 'permanent'}
       {...(hidden ? { ...MobileDrawerProps } : { ...DesktopDrawerProps })}
-      PaperProps={{ sx: { width: navWidth } }}
+      PaperProps={{
+        sx: {
+          width: navWidth,
+          background: 'var(--liquid-glass-surface)',
+          borderRight: `1px solid ${
+            theme.palette.mode === 'light' ? alpha('#ffffff', 0.32) : alpha('#94a3b8', 0.18)
+          }`,
+          boxShadow: 'var(--liquid-glass-shadow)',
+          backdropFilter: 'var(--liquid-glass-backdrop)',
+          WebkitBackdropFilter: 'var(--liquid-glass-backdrop)'
+        }
+      }}
       sx={{
         width: navWidth,
         '& .MuiDrawer-paper': {
           borderRight: 0,
-          backgroundColor: theme.palette.background.default
+          backgroundColor: 'transparent'
         }
       }}
     >

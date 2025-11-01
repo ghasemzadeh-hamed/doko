@@ -1,7 +1,6 @@
-
 // components/AddOffice.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AddOffice: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -31,8 +30,9 @@ const AddOffice: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/Office/', formData);
+      const response = await apiClient.post('/Office/', formData);
       console.log('Office added successfully:', response.data);
+
       // You can perform additional actions after adding the office
     } catch (error) {
       console.error('Error adding office:', error);

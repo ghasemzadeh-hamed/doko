@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface OverTimeData {
@@ -7,6 +8,7 @@ interface OverTimeData {
   start_time: string;
   end_time: string;
   duration: string;
+
   // اضافه کردن سایر فیلدهای مورد نیاز
 }
 
@@ -14,7 +16,7 @@ const OverTimeComponent: React.FC = () => {
   const [overtimes, setOvertimes] = useState<OverTimeData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/OverTime/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/OverTime/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setOvertimes(response.data);
       })

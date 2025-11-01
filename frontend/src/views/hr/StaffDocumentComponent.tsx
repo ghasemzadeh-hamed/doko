@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface StaffDocumentData {
@@ -8,6 +9,7 @@ interface StaffDocumentData {
   description: string;
   file: string;
   public: boolean;
+
   // اضافه کردن سایر فیلدهای مورد نیاز
 }
 
@@ -15,7 +17,7 @@ const StaffDocumentComponent: React.FC = () => {
   const [documents, setDocuments] = useState<StaffDocumentData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/StaffDocument/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/StaffDocument/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setDocuments(response.data);
       })

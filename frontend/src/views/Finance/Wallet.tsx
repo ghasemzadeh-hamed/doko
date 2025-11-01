@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/Wallet/';
+const API_ENDPOINT = '/Wallet/';
 
 const WalletComponent = () => {
   const [wallets, setWallets] = useState([]);
@@ -17,7 +17,7 @@ const WalletComponent = () => {
 
   const fetchWallets = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setWallets(response.data);
     } catch (error) {
       console.error('Error fetching wallets:', error);
@@ -30,7 +30,7 @@ const WalletComponent = () => {
 
   const handleDelete = async (walletId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${walletId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${walletId}/`);
       console.log('Wallet deleted successfully:', response.data);
       fetchWallets();
     } catch (error) {
@@ -41,10 +41,10 @@ const WalletComponent = () => {
   const handleSave = async () => {
     try {
       if (editingWallet) {
-        const response = await axios.put(`${API_ENDPOINT}${editingWallet.id}/`, editingWallet);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingWallet.id}/`, editingWallet);
         console.log('Wallet updated successfully:', response.data);
       } else {
-        const response = await axios.post(API_ENDPOINT, newWallet);
+        const response = await apiClient.post(API_ENDPOINT, newWallet);
         console.log('New wallet added successfully:', response.data);
       }
 

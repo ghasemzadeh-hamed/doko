@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const RoleComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const RoleComponent = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Role/');
+      const response = await apiClient.get('/Role/');
       setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);
@@ -38,7 +38,7 @@ const RoleComponent = () => {
 
   const handleDelete = async (roleId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Role/${roleId}/`);
+      const response = await apiClient.delete(`/Role/${roleId}/`);
       console.log('Role deleted successfully:', response.data);
       fetchRoles(); // Fetch roles again after deletion
     } catch (error) {
@@ -50,15 +50,16 @@ const RoleComponent = () => {
     try {
       if (editingRole) {
         // Update existing role
-        const response = await axios.put(`http://localhost:8000/Role/${editingRole.id}/`, editingRole);
+        const response = await apiClient.put(`/Role/${editingRole.id}/`, editingRole);
         console.log('Role updated successfully:', response.data);
       } else {
         // Create new role
         const newRole = {
           name: '',
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Role/', newRole);
+        const response = await apiClient.post('/Role/', newRole);
         console.log('New role added successfully:', response.data);
       }
 

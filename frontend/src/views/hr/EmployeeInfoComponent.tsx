@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface EmployeeInfoData {
@@ -15,6 +16,7 @@ interface EmployeeInfoData {
   start_date: string;
   end_date: string;
   employment_contract: string;
+
   // اضافه کردن سایر فیلدهای مورد نیاز
 }
 
@@ -22,7 +24,7 @@ const EmployeeInfoComponent: React.FC = () => {
   const [employeeInfos, setEmployeeInfos] = useState<EmployeeInfoData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/EmployeeInfo/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/EmployeeInfo/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setEmployeeInfos(response.data);
       })

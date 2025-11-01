@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const EventComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const EventComponent = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Event/');
+      const response = await apiClient.get('/Event/');
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -43,7 +43,7 @@ const EventComponent = () => {
 
   const handleDelete = async (eventId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Event/${eventId}/`);
+      const response = await apiClient.delete(`/Event/${eventId}/`);
       console.log('Event deleted successfully:', response.data);
       fetchEvents(); // Fetch events again after deletion
     } catch (error) {
@@ -55,7 +55,7 @@ const EventComponent = () => {
     try {
       if (editingEvent) {
         // Update existing event
-        const response = await axios.put(`http://localhost:8000/Event/${editingEvent.id}/`, editingEvent);
+        const response = await apiClient.put(`/Event/${editingEvent.id}/`, editingEvent);
         console.log('Event updated successfully:', response.data);
       } else {
         // Create new event
@@ -78,7 +78,7 @@ const EventComponent = () => {
           teams: [],
           tags: [],
         };
-        const response = await axios.post('http://localhost:8000/Event/', newEvent);
+        const response = await apiClient.post('/Event/', newEvent);
         console.log('New event added successfully:', response.data);
       }
 

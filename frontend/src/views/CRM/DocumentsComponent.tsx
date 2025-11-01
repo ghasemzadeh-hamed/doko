@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const DocumentsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const DocumentsComponent = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Documents/');
+      const response = await apiClient.get('/Documents/');
       setDocuments(response.data);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -38,7 +38,7 @@ const DocumentsComponent = () => {
 
   const handleDelete = async (documentId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Document/${documentId}/`);
+      const response = await apiClient.delete(`/Document/${documentId}/`);
       console.log('Document deleted successfully:', response.data);
       fetchDocuments(); // Fetch documents again after deletion
     } catch (error) {

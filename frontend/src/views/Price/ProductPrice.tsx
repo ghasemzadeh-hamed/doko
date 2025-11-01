@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ProductPriceComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ProductPriceComponent = () => {
 
   const fetchProductPrices = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/ProductPrice/');
+      const response = await apiClient.get('/ProductPrice/');
       setProductPrices(response.data);
     } catch (error) {
       console.error('Error fetching product prices:', error);
@@ -38,7 +38,7 @@ const ProductPriceComponent = () => {
 
   const handleDelete = async (productPriceId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/ProductPrice/${productPriceId}/`);
+      const response = await apiClient.delete(`/ProductPrice/${productPriceId}/`);
       console.log('Product price deleted successfully:', response.data);
       fetchProductPrices(); // Fetch product prices again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ProductPriceComponent = () => {
     try {
       if (editingProductPrice) {
         // Update existing product price
-        const response = await axios.put(`http://localhost:8000/ProductPrice/${editingProductPrice.id}/`, editingProductPrice);
+        const response = await apiClient.put(`/ProductPrice/${editingProductPrice.id}/`, editingProductPrice);
         console.log('Product price updated successfully:', response.data);
       } else {
         // Create new product price
         const newProductPrice = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/ProductPrice/', newProductPrice);
+        const response = await apiClient.post('/ProductPrice/', newProductPrice);
         console.log('New product price added successfully:', response.data);
       }
 

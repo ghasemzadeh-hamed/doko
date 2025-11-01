@@ -11,10 +11,11 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // ** Constants
-const API_ENDPOINT = 'http://localhost:8000/Task/';
+const API_ENDPOINT = '/Task/';
 
 const TaskComponent = () => {
   // ** State
@@ -28,7 +29,7 @@ const TaskComponent = () => {
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setTasks(response.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -41,7 +42,7 @@ const TaskComponent = () => {
 
   const handleDelete = async (taskId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${taskId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${taskId}/`);
       console.log('Task deleted successfully:', response.data);
       fetchTasks(); // Fetch tasks again after deletion
     } catch (error) {
@@ -53,14 +54,14 @@ const TaskComponent = () => {
     try {
       if (editingTask) {
         // Update existing task
-        const response = await axios.put(`${API_ENDPOINT}${editingTask.id}/`, editingTask);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingTask.id}/`, editingTask);
         console.log('Task updated successfully:', response.data);
       } else {
         // Create new task
         const newTask = {
           // Add other fields as needed
         };
-        const response = await axios.post(API_ENDPOINT, newTask);
+        const response = await apiClient.post(API_ENDPOINT, newTask);
         console.log('New task added successfully:', response.data);
       }
 

@@ -20,6 +20,11 @@ import {
 import moment from 'moment'
 
 type DateFilterKey = 'startDate' | 'endDate'
+import React, { useState, useEffect } from 'react';
+import apiClient from 'src/services/apiClient';
+
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import moment from 'moment';
 
 interface WorkingHoursData {
   id: number
@@ -92,53 +97,15 @@ const WorkingHoursComponent: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const apiBaseUrl = 'http://127.0.0.1:8000'
-
-  const handleFilterChange = (field: DateFilterKey) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    setFilters(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleApplyFilters = () => {
-    setActiveFilters(filters)
-  }
-
-  const handleResetFilters = () => {
-    setFilters(initialFilters)
-    setActiveFilters(initialFilters)
-    setError(null)
-  }
-
-  const formatDate = (value?: string | null) => {
-    if (!value) {
-      return '-'
-    }
-
-    return moment(value).format('YYYY-MM-DD')
-  }
-
-  const formatDateTime = (value?: string | null) => {
-    if (!value) {
-      return '-'
-    }
-
-    return moment(value).format('YYYY-MM-DD HH:mm')
-  }
-
-  const formatHours = (value?: number | null) => {
-    if (value === undefined || value === null) {
-      return '-'
-    }
-
-    return value.toFixed(2)
-  }
-
-  const formatCurrency = (value?: number | string | null) => {
-    if (value === undefined || value === null) {
-      return '-'
-    }
-
-    const numericValue = typeof value === 'string' ? Number(value) : value
+  useEffect(() => {
+    apiClient.get('/WorkingHours/')
+      .then(response => {
+        setWorkingHours(response.data);
+      })
+      .catch(error => {
+        console.error('There was an error retrieving the working hours!', error);
+      });
+  }, []);
 
     if (Number.isNaN(numericValue)) {
       return '-'

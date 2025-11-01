@@ -1,6 +1,7 @@
 // components/LocationList.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface Location {
   id: number;
@@ -14,7 +15,7 @@ const LocationList: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
 
   useEffect(() => {
-    axios.get<Location[]>('http://localhost:8000/location/')
+    apiClient.get<Location[]>('/location/')
       .then(response => {
         setLocations(response.data);
       })

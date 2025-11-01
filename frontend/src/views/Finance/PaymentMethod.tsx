@@ -11,10 +11,11 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 
-const API_ENDPOINT = 'http://localhost:8000/PaymentMethod/';
+
+const API_ENDPOINT = '/PaymentMethod/';
 
 
 const PaymentMethodComponent = () => {
@@ -29,7 +30,7 @@ const PaymentMethodComponent = () => {
 
   const fetchPaymentMethods = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setPaymentMethods(response.data);
     } catch (error) {
       console.error('Error fetching payment methods:', error);
@@ -42,7 +43,7 @@ const PaymentMethodComponent = () => {
 
   const handleDelete = async (methodId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${methodId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${methodId}/`);
       console.log('Payment method deleted successfully:', response.data);
       fetchPaymentMethods(); // Fetch methods again after deletion
     } catch (error) {
@@ -54,14 +55,14 @@ const PaymentMethodComponent = () => {
     try {
       if (editingMethod) {
         // Update existing method
-        const response = await axios.put(`${API_ENDPOINT}${editingMethod.id}/`, editingMethod);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingMethod.id}/`, editingMethod);
         console.log('Payment method updated successfully:', response.data);
       } else {
         // Create new method
         const newMethod = {
           // Add other fields as needed
         };
-        const response = await axios.post(API_ENDPOINT, newMethod);
+        const response = await apiClient.post(API_ENDPOINT, newMethod);
         console.log('New payment method added successfully:', response.data);
       }
 

@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const OrderItemComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const OrderItemComponent = () => {
 
   const fetchOrderItems = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/orderitems/');
+      const response = await apiClient.get('/orderitems/');
       setOrderItems(response.data);
     } catch (error) {
       console.error('Error fetching order items:', error);
@@ -38,7 +38,7 @@ const OrderItemComponent = () => {
 
   const handleDelete = async (orderItemId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/orderitems/${orderItemId}/`);
+      const response = await apiClient.delete(`/orderitems/${orderItemId}/`);
       console.log('Order item deleted successfully:', response.data);
       fetchOrderItems(); // Fetch order items again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const OrderItemComponent = () => {
     try {
       if (editingOrderItem) {
         // Update existing order item
-        const response = await axios.put(`http://localhost:8000/orderitems/${editingOrderItem.id}/`, editingOrderItem);
+        const response = await apiClient.put(`/orderitems/${editingOrderItem.id}/`, editingOrderItem);
         console.log('Order item updated successfully:', response.data);
       } else {
         // Create new order item
         const newOrderItem = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/orderitems/', newOrderItem);
+        const response = await apiClient.post('/orderitems/', newOrderItem);
         console.log('New order item added successfully:', response.data);
       }
 

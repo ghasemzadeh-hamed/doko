@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ReminderComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ReminderComponent = () => {
 
   const fetchReminders = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Reminder/');
+      const response = await apiClient.get('/Reminder/');
       setReminders(response.data);
     } catch (error) {
       console.error('Error fetching reminders:', error);
@@ -38,7 +38,7 @@ const ReminderComponent = () => {
 
   const handleDelete = async (reminderId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Reminder/${reminderId}/`);
+      const response = await apiClient.delete(`/Reminder/${reminderId}/`);
       console.log('Reminder deleted successfully:', response.data);
       fetchReminders(); // Fetch reminders again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ReminderComponent = () => {
     try {
       if (editingReminder) {
         // Update existing reminder
-        const response = await axios.put(`http://localhost:8000/Reminder/${editingReminder.id}/`, editingReminder);
+        const response = await apiClient.put(`/Reminder/${editingReminder.id}/`, editingReminder);
         console.log('Reminder updated successfully:', response.data);
       } else {
         // Create new reminder
         const newReminder = {
           reminder_type: null,
         };
-        const response = await axios.post('http://localhost:8000/Reminder/', newReminder);
+        const response = await apiClient.post('/Reminder/', newReminder);
         console.log('New reminder added successfully:', response.data);
       }
 

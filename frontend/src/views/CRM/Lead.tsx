@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const LeadComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const LeadComponent = () => {
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Lead/');
+      const response = await apiClient.get('/Lead/');
       setLeads(response.data);
     } catch (error) {
       console.error('Error fetching leads:', error);
@@ -43,7 +43,7 @@ const LeadComponent = () => {
 
   const handleDelete = async (leadId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Lead/${leadId}/`);
+      const response = await apiClient.delete(`/Lead/${leadId}/`);
       console.log('Lead deleted successfully:', response.data);
       fetchLeads(); // Fetch leads again after deletion
     } catch (error) {
@@ -55,12 +55,12 @@ const LeadComponent = () => {
     try {
       if (editingLead) {
         // Update existing lead
-        const response = await axios.put(`http://localhost:8000/Lead/${editingLead.id}/`, editingLead);
+        const response = await apiClient.put(`/Lead/${editingLead.id}/`, editingLead);
         console.log('Lead updated successfully:', response.data);
       } else {
         // Create new lead
         const newLead = { title: '', source: null, status: null, description: '', is_active: false, probability: null, close_date: null, assigned_to: [] };
-        const response = await axios.post('http://localhost:8000/Lead/', newLead);
+        const response = await apiClient.post('/Lead/', newLead);
         console.log('New lead added successfully:', response.data);
       }
 

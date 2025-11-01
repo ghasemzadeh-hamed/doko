@@ -1,9 +1,32 @@
 from backend.users.models import Courier, Seller, Customer, Organization
 from django.core.exceptions import ValidationError
 from backend.models import *
+from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 from djmoney.models.fields import MoneyField
+from djmoney.money import Money
+from typing import Optional
+
+
+DEFAULT_CURRENCY = "IRR"
+
+
+def _ensure_money(amount, *, currency):
+    """Return a :class:`~djmoney.money.Money` instance for ``amount``.
+
+    ``amount`` can be provided as either a numeric value or an existing ``Money``
+    instance.  When a ``Money`` instance with a different currency is supplied,
+    we raise a :class:`ValidationError` to avoid silent conversions.
+    """
+
+    if isinstance(amount, Money):
+        if amount.currency.code != currency:
+            raise ValidationError("Currency mismatch for monetary operation.")
+        return amount
+    if amount is None:
+        return Money(0, currency)
+    return Money(amount, currency)
 
 # کلاس هزینه پیک
 class CourierExpense(models.Model):
@@ -20,19 +43,24 @@ class CourierExpense(models.Model):
         """
         super(CourierExpense, self).save(*args, **kwargs)
 
-    def create_expense(self, amount, currency='IRR'):
-        """
-        ایجاد هزینه جدید برای پیک
-        """
-        money_amount = MoneyField(amount, currency)
-        self.amount += money_amount
-        self.save()
+    def create_expense(self, amount, currency=DEFAULT_CURRENCY):
+        """ایجاد هزینه جدید برای پیک"""
+
+        currency_code = (
+            self.amount.currency.code
+            if self.amount
+            else (amount.currency.code if isinstance(amount, Money) else currency)
+        )
+        current_amount = self.amount or Money(0, currency_code)
+        money_amount = _ensure_money(amount, currency=currency_code)
+        self.amount = current_amount + money_amount
+        self.save(update_fields=["amount"])
 
     def get_balance(self):
         """
         دریافت موجودی فعلی کیف پول پیک
         """
-        return self.amount
+        return self.amount or Money(0, DEFAULT_CURRENCY)
 
 # کلاس درآمد
 class Income(models.Model):
@@ -43,19 +71,24 @@ class Income(models.Model):
     def __str__(self):
         return f"Income for Seller: {self.user} - Amount: {self.amount}"
 
-    def add_income(self, amount, currency='IRR'):
-        """
-        افزودن درآمد به حساب فروشنده
-        """
-        money_amount = MoneyField(amount, currency)
-        self.amount += money_amount
-        self.save()
+    def add_income(self, amount, currency=DEFAULT_CURRENCY):
+        """افزودن درآمد به حساب فروشنده"""
+
+        currency_code = (
+            self.amount.currency.code
+            if self.amount
+            else (amount.currency.code if isinstance(amount, Money) else currency)
+        )
+        current_amount = self.amount or Money(0, currency_code)
+        money_amount = _ensure_money(amount, currency=currency_code)
+        self.amount = current_amount + money_amount
+        self.save(update_fields=["amount"])
 
     def get_total_income(self):
         """
         دریافت مجموع درآمد فروشنده
         """
-        return self.amount
+        return self.amount or Money(0, DEFAULT_CURRENCY)
 
     def get_seller(self):
         """
@@ -133,7 +166,7 @@ class TotalSales(models.Model):
 
 
 class Commission(models.Model):
-    commission = models.IntegerField(max_length=2,null=True,blank=True)
+    commission = models.PositiveSmallIntegerField(null=True, blank=True)
 # کلاس محاسبه 5 درصد از سفارشات فروشندگان
 
 class SellerCommission(models.Model):
@@ -167,16 +200,20 @@ class FinancialKeys(models.Model):
     bank_account_number = models.CharField(max_length=20)
     tax_number = models.CharField(max_length=20)
     # دیگر اطلاعات مالی
+
     def __str__(self):
         return f"کلید مالی برای {self.user}"
+
     @classmethod
     def create_financial_key(cls, user, bank_account_number, tax_number):
-        return cls.objects.create(user=user, bank_account_number=bank_account_number, tax_number=tax_number)
+        return cls.objects.create(
+            user=user, bank_account_number=bank_account_number, tax_number=tax_number
+        )
 
     def update_financial_key(self, bank_account_number, tax_number):
         self.bank_account_number = bank_account_number
         self.tax_number = tax_number
-        self.save()
+        self.save(update_fields=["bank_account_number", "tax_number"])
 
     def delete_financial_key(self):
         self.delete()
@@ -184,6 +221,563 @@ class FinancialKeys(models.Model):
     @classmethod
     def get_financial_key_by_user(cls, user):
         return cls.objects.filter(user=user).first()
+
+
+class Account(models.Model):
+    class AccountType(models.TextChoices):
+        ASSET = "ASSET", "دارایی"
+        LIABILITY = "LIABILITY", "بدهی"
+        EQUITY = "EQUITY", "سرمایه"
+        REVENUE = "REVENUE", "درآمد"
+        EXPENSE = "EXPENSE", "هزینه"
+
+    class DetailLevel(models.TextChoices):
+        CONTROL = "CONTROL", "کنترل"
+        SUBSIDIARY = "SUBSIDIARY", "معین"
+        ANALYTICAL = "ANALYTICAL", "تفضیلی"
+
+    code = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=255)
+    account_type = models.CharField(
+        max_length=20, choices=AccountType.choices, default=AccountType.ASSET
+    )
+    detail_level = models.CharField(
+        max_length=20, choices=DetailLevel.choices, default=DetailLevel.CONTROL
+    )
+    parent = models.ForeignKey(
+        "self", on_delete=models.CASCADE, related_name="children", null=True, blank=True
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Account"
+        verbose_name_plural = "Accounts"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+    def clean(self):
+        if self.parent and self.parent.detail_level == Account.DetailLevel.ANALYTICAL:
+            raise ValidationError("Analytical accounts cannot have child accounts.")
+        if self.parent is None and self.detail_level != Account.DetailLevel.CONTROL:
+            raise ValidationError("Only control accounts can be root accounts.")
+
+    def activate(self):
+        self.is_active = True
+        self.save(update_fields=["is_active"])
+
+    def deactivate(self):
+        if self.children.filter(is_active=True).exists():
+            raise ValidationError("Cannot deactivate an account with active children.")
+        self.is_active = False
+        self.save(update_fields=["is_active"])
+
+
+class DetailAccount(models.Model):
+    class DetailType(models.TextChoices):
+        PERSON = "PERSON", "اشخاص"
+        COST_CENTER = "COST_CENTER", "مراکز هزینه"
+        PROJECT = "PROJECT", "پروژه"
+        CONTRACT = "CONTRACT", "قرارداد"
+
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="detail_accounts")
+    code = models.CharField(max_length=30)
+    name = models.CharField(max_length=255)
+    detail_type = models.CharField(max_length=20, choices=DetailType.choices)
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="detail_accounts",
+    )
+
+    class Meta:
+        unique_together = ("account", "code")
+
+    def __str__(self):
+        return f"{self.account.code}-{self.code} {self.name}"
+
+    def clean(self):
+        super().clean()
+        if self.user and self.detail_type != DetailAccount.DetailType.PERSON:
+            raise ValidationError(
+                "Only person type detail accounts can be linked to a user."
+            )
+
+    @property
+    def ledger_user(self):
+        return self.user
+
+
+class UserLedgerBalance(models.Model):
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name="ledger_balance"
+    )
+    total_debit = MoneyField(
+        max_digits=13, decimal_places=2, default=0, default_currency=DEFAULT_CURRENCY
+    )
+    total_credit = MoneyField(
+        max_digits=13, decimal_places=2, default=0, default_currency=DEFAULT_CURRENCY
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "User Ledger Balance"
+        verbose_name_plural = "User Ledger Balances"
+
+    def __str__(self):
+        side = self.balance_side
+        amount = self.balance_amount
+        return f"{self.user} - {side} {amount}" if amount else f"{self.user} - صفر"
+
+    @property
+    def currency_code(self):
+        if self.total_debit is not None:
+            return self.total_debit.currency.code
+        if self.total_credit is not None:
+            return self.total_credit.currency.code
+        return DEFAULT_CURRENCY
+
+    def _increment_money_field(self, field_name, amount):
+        if amount is None:
+            return False
+        if isinstance(amount, Money):
+            currency = amount.currency.code
+        else:
+            currency = self.currency_code
+        money_amount = _ensure_money(amount, currency=currency)
+        current_value = getattr(self, field_name)
+        if current_value is None or current_value.amount == 0:
+            current_value = Money(0, money_amount.currency)
+        if money_amount.amount == 0:
+            setattr(self, field_name, current_value)
+            return True
+        if current_value.currency != money_amount.currency:
+            raise ValidationError("Currency mismatch for user ledger accumulation.")
+        setattr(self, field_name, current_value + money_amount)
+        return True
+
+    def register_debit(self, amount, currency=DEFAULT_CURRENCY):
+        updated = self._increment_money_field("total_debit", _ensure_money(amount, currency=currency))
+        if updated:
+            self.save(update_fields=["total_debit", "updated_at"])
+
+    def register_credit(self, amount, currency=DEFAULT_CURRENCY):
+        updated = self._increment_money_field(
+            "total_credit", _ensure_money(amount, currency=currency)
+        )
+        if updated:
+            self.save(update_fields=["total_credit", "updated_at"])
+
+    @classmethod
+    def record_entry(cls, *, user, debit=None, credit=None, currency=DEFAULT_CURRENCY):
+        ledger, _ = cls.objects.get_or_create(user=user)
+        updated_fields = []
+        if debit is not None:
+            ledger._increment_money_field("total_debit", _ensure_money(debit, currency=currency))
+            updated_fields.append("total_debit")
+        if credit is not None:
+            ledger._increment_money_field(
+                "total_credit", _ensure_money(credit, currency=currency)
+            )
+            updated_fields.append("total_credit")
+        if updated_fields:
+            updated_fields.append("updated_at")
+            ledger.save(update_fields=updated_fields)
+        return ledger
+
+    @property
+    def net_balance(self):
+        return self.total_debit - self.total_credit
+
+    @property
+    def balance_amount(self):
+        balance = self.net_balance
+        return balance if balance.amount >= 0 else Money(-balance.amount, balance.currency)
+
+    @property
+    def balance_side(self):
+        balance = self.net_balance
+        if balance.amount > 0:
+            return "بدهکار"
+        if balance.amount < 0:
+            return "بستانکار"
+        return "متعادل"
+
+
+class AccountingDocument(models.Model):
+    class DocumentStatus(models.TextChoices):
+        PROVISIONAL = "PROVISIONAL", "غیر قطعی"
+        FINAL = "FINAL", "قطعی"
+
+    number = models.CharField(max_length=30, unique=True)
+    document_date = models.DateField(default=timezone.now)
+    status = models.CharField(
+        max_length=20, choices=DocumentStatus.choices, default=DocumentStatus.PROVISIONAL
+    )
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-document_date", "-created_at"]
+
+    def __str__(self):
+        return f"Document {self.number} ({self.get_status_display()})"
+
+    @property
+    def is_final(self):
+        return self.status == AccountingDocument.DocumentStatus.FINAL
+
+    def finalize(self):
+        if self.lines.count() == 0:
+            raise ValidationError("Cannot finalize an empty accounting document.")
+        if self.total_debit != self.total_credit:
+            raise ValidationError("Document must be balanced before finalizing.")
+        self.status = AccountingDocument.DocumentStatus.FINAL
+        self.save(update_fields=["status"])
+
+    def revert_to_provisional(self):
+        self.status = AccountingDocument.DocumentStatus.PROVISIONAL
+        self.save(update_fields=["status"])
+
+    @property
+    def total_debit(self):
+        total = Money(0, DEFAULT_CURRENCY)
+
+        def _accumulate(current_total, value):
+            if value is None:
+                return current_total
+            if current_total.currency != value.currency:
+                if current_total.amount == 0:
+                    return Money(value.amount, value.currency)
+                if value.amount == 0:
+                    return current_total
+                raise ValidationError("Cannot sum amounts with different currencies.")
+            return current_total + value
+
+        for line in self.lines.all():
+            total = _accumulate(total, line.debit)
+        return total
+
+    @property
+    def total_credit(self):
+        total = Money(0, DEFAULT_CURRENCY)
+
+        def _accumulate(current_total, value):
+            if value is None:
+                return current_total
+            if current_total.currency != value.currency:
+                if current_total.amount == 0:
+                    return Money(value.amount, value.currency)
+                if value.amount == 0:
+                    return current_total
+                raise ValidationError("Cannot sum amounts with different currencies.")
+            return current_total + value
+
+        for line in self.lines.all():
+            total = _accumulate(total, line.credit)
+        return total
+
+    def add_line(
+        self,
+        *,
+        account,
+        detail_account=None,
+        debit=None,
+        credit=None,
+        currency=DEFAULT_CURRENCY,
+        description="",
+    ):
+        if self.is_final:
+            raise ValidationError("Cannot modify a finalized accounting document.")
+        debit_money = _ensure_money(debit, currency=currency) if debit is not None else None
+        credit_money = _ensure_money(credit, currency=currency) if credit is not None else None
+        if debit_money and credit_money:
+            raise ValidationError("A document line cannot have both debit and credit amounts.")
+        if not debit_money and not credit_money:
+            raise ValidationError("Either debit or credit must be provided for a document line.")
+        if detail_account and detail_account.account_id != account.id:
+            raise ValidationError("Detail account does not belong to the selected account.")
+        if account.detail_level == Account.DetailLevel.ANALYTICAL and detail_account is None:
+            raise ValidationError("Analytical accounts require a detail account to be specified.")
+        return AccountingDocumentLine.objects.create(
+            document=self,
+            account=account,
+            detail_account=detail_account,
+            debit=debit_money,
+            credit=credit_money,
+            description=description,
+        )
+
+
+class AccountingDocumentLine(models.Model):
+    document = models.ForeignKey(
+        AccountingDocument, related_name="lines", on_delete=models.CASCADE
+    )
+    account = models.ForeignKey(Account, on_delete=models.PROTECT)
+    detail_account = models.ForeignKey(
+        DetailAccount, on_delete=models.PROTECT, null=True, blank=True
+    )
+    debit = MoneyField(
+        max_digits=13, decimal_places=2, default_currency=DEFAULT_CURRENCY, null=True, blank=True
+    )
+    credit = MoneyField(
+        max_digits=13, decimal_places=2, default_currency=DEFAULT_CURRENCY, null=True, blank=True
+    )
+    description = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        verbose_name = "Accounting Document Line"
+        verbose_name_plural = "Accounting Document Lines"
+
+    def clean(self):
+        if self.debit and self.credit:
+            raise ValidationError("Only debit or credit can be set, not both.")
+        if not self.debit and not self.credit:
+            raise ValidationError("Either debit or credit must be provided.")
+        if self.detail_account and self.detail_account.account_id != self.account_id:
+            raise ValidationError("Detail account does not belong to the selected account.")
+        if (
+            self.account.detail_level == Account.DetailLevel.ANALYTICAL
+            and self.detail_account is None
+        ):
+            raise ValidationError("Analytical accounts require a detail account to be specified.")
+        if self.document.is_final:
+            raise ValidationError("Cannot modify a finalized accounting document.")
+
+    @property
+    def currency_code(self):
+        if self.debit:
+            return self.debit.currency.code
+        if self.credit:
+            return self.credit.currency.code
+        return DEFAULT_CURRENCY
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        amount = self.debit or self.credit
+        side = "بدهکار" if self.debit else "بستانکار"
+        return f"{self.document.number} - {self.account.code} ({side} {amount})"
+
+
+class DocumentWorkflowService:
+    """Service helpers for managing accounting documents and their lines."""
+
+    @staticmethod
+    def create_document(*, number, document_date=None, description=""):
+        return AccountingDocument.objects.create(
+            number=number,
+            document_date=document_date or timezone.now().date(),
+            description=description,
+        )
+
+    @staticmethod
+    def register_line(
+        document: AccountingDocument,
+        *,
+        account: Account,
+        detail_account: Optional[DetailAccount] = None,
+        debit=None,
+        credit=None,
+        currency=DEFAULT_CURRENCY,
+        description="",
+        ledger_user: Optional[CustomUser] = None,
+    ):
+        line = document.add_line(
+            account=account,
+            detail_account=detail_account,
+            debit=debit,
+            credit=credit,
+            currency=currency,
+            description=description,
+        )
+        balance_user = ledger_user
+        if balance_user is None and detail_account and detail_account.ledger_user:
+            balance_user = detail_account.ledger_user
+        if balance_user:
+            UserLedgerBalance.record_entry(
+                user=balance_user,
+                debit=line.debit,
+                credit=line.credit,
+                currency=line.currency_code,
+            )
+        return line
+
+    @staticmethod
+    def finalize_document(document: AccountingDocument):
+        with transaction.atomic():
+            document.refresh_from_db()
+            document.finalize()
+
+    @staticmethod
+    def register_sales_return(
+        *,
+        number: str,
+        customer: Customer,
+        amount,
+        receivable_account: Account,
+        sales_return_account: Account,
+        receivable_detail: Optional[DetailAccount] = None,
+        currency=DEFAULT_CURRENCY,
+        description: str = "",
+        reason: str = "",
+    ):
+        currency_code = amount.currency.code if isinstance(amount, Money) else currency
+        money_amount = _ensure_money(amount, currency=currency_code)
+        line_description = description or f"برگشت از فروش برای {customer}"
+        with transaction.atomic():
+            document = DocumentWorkflowService.create_document(
+                number=number,
+                description=line_description,
+            )
+            DocumentWorkflowService.register_line(
+                document,
+                account=sales_return_account,
+                debit=money_amount,
+                currency=money_amount.currency.code,
+                description=line_description,
+            )
+            DocumentWorkflowService.register_line(
+                document,
+                account=receivable_account,
+                detail_account=receivable_detail,
+                credit=money_amount,
+                currency=money_amount.currency.code,
+                description=line_description,
+                ledger_user=customer,
+            )
+            document.finalize()
+            return SalesReturn.objects.create(
+                document=document,
+                customer=customer,
+                amount=money_amount,
+                reason=reason,
+            )
+
+    @staticmethod
+    def register_purchase_return(
+        *,
+        number: str,
+        seller: Seller,
+        amount,
+        payable_account: Account,
+        purchase_return_account: Account,
+        payable_detail: Optional[DetailAccount] = None,
+        currency=DEFAULT_CURRENCY,
+        description: str = "",
+        reason: str = "",
+    ):
+        currency_code = amount.currency.code if isinstance(amount, Money) else currency
+        money_amount = _ensure_money(amount, currency=currency_code)
+        line_description = description or f"برگشت از خرید برای {seller}"
+        with transaction.atomic():
+            document = DocumentWorkflowService.create_document(
+                number=number,
+                description=line_description,
+            )
+            DocumentWorkflowService.register_line(
+                document,
+                account=payable_account,
+                detail_account=payable_detail,
+                debit=money_amount,
+                currency=money_amount.currency.code,
+                description=line_description,
+                ledger_user=seller,
+            )
+            DocumentWorkflowService.register_line(
+                document,
+                account=purchase_return_account,
+                credit=money_amount,
+                currency=money_amount.currency.code,
+                description=line_description,
+            )
+            document.finalize()
+            return PurchaseReturn.objects.create(
+                document=document,
+                seller=seller,
+                amount=money_amount,
+                reason=reason,
+            )
+
+class SalesReturn(models.Model):
+    document = models.OneToOneField(
+        AccountingDocument, on_delete=models.CASCADE, related_name="sales_return"
+    )
+    customer = models.ForeignKey(
+        Customer, on_delete=models.PROTECT, related_name="sales_returns"
+    )
+    amount = MoneyField(
+        max_digits=13, decimal_places=2, default_currency=DEFAULT_CURRENCY
+    )
+    reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Sales Return"
+        verbose_name_plural = "Sales Returns"
+
+    def __str__(self):
+        return f"برگشت از فروش {self.customer} - {self.amount}"
+
+    def clean(self):
+        super().clean()
+        if not self.document.is_final:
+            raise ValidationError("Sales return documents must be finalized.")
+        total_debit = self.document.total_debit
+        total_credit = self.document.total_credit
+        if total_debit != total_credit:
+            raise ValidationError("Sales return document must be balanced.")
+        if total_debit != self.amount:
+            raise ValidationError("Sales return amount must match document totals.")
+
+    @property
+    def currency_code(self):
+        return self.amount.currency.code
+
+
+class PurchaseReturn(models.Model):
+    document = models.OneToOneField(
+        AccountingDocument, on_delete=models.CASCADE, related_name="purchase_return"
+    )
+    seller = models.ForeignKey(
+        Seller, on_delete=models.PROTECT, related_name="purchase_returns"
+    )
+    amount = MoneyField(
+        max_digits=13, decimal_places=2, default_currency=DEFAULT_CURRENCY
+    )
+    reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Purchase Return"
+        verbose_name_plural = "Purchase Returns"
+
+    def __str__(self):
+        return f"برگشت از خرید {self.seller} - {self.amount}"
+
+    def clean(self):
+        super().clean()
+        if not self.document.is_final:
+            raise ValidationError("Purchase return documents must be finalized.")
+        total_debit = self.document.total_debit
+        total_credit = self.document.total_credit
+        if total_debit != total_credit:
+            raise ValidationError("Purchase return document must be balanced.")
+        if total_credit != self.amount:
+            raise ValidationError("Purchase return amount must match document totals.")
+
+    @property
+    def currency_code(self):
+        return self.amount.currency.code
+
 
 # کلاس امورمالیاتی
 class TaxSetting(models.Model):
@@ -253,28 +847,45 @@ class Debt(models.Model):
         """
         ایجاد یک بدهی جدید برای فروشنده
         """
-        debt = cls(seller=seller, amount=amount, description=description)
+        currency_code = (
+            amount.currency.code if isinstance(amount, Money) else DEFAULT_CURRENCY
+        )
+        money_amount = _ensure_money(amount, currency=currency_code)
+        if money_amount.amount < 0:
+            raise ValidationError("Debt amount cannot be negative.")
+        debt = cls(
+            seller=seller,
+            amount=money_amount,
+            description=description,
+        )
         debt.save()
         return debt
 
 
     def add_debt(self, additional_amount):
         """Add to the existing debt amount."""
-        if additional_amount < 0:
+        base_currency = self.amount.currency.code if self.amount else DEFAULT_CURRENCY
+        money_amount = _ensure_money(additional_amount, currency=base_currency)
+        if money_amount.amount < 0:
             raise ValidationError("Additional amount cannot be negative.")
-        self.amount += additional_amount
+        current_amount = self.amount or Money(0, base_currency)
+        self.amount = current_amount + money_amount
         self.is_paid = False
         self.save()
 
     def make_payment(self, payment_amount):
         """Make a payment towards the debt."""
-        if payment_amount < 0:
+        base_currency = self.amount.currency.code if self.amount else DEFAULT_CURRENCY
+        money_amount = _ensure_money(payment_amount, currency=base_currency)
+        if money_amount.amount < 0:
             raise ValidationError("Payment amount cannot be negative.")
-        if payment_amount > self.amount:
+        if money_amount > (self.amount or Money(0, base_currency)):
             raise ValidationError("Payment amount cannot exceed the debt amount.")
-        self.amount -= payment_amount
-        if self.amount == 0:
+        self.amount = (self.amount or Money(0, base_currency)) - money_amount
+        if self.amount.amount == 0:
             self.is_paid = True
+        else:
+            self.is_paid = False
         self.save()
 
 
@@ -292,7 +903,9 @@ class Debt(models.Model):
         """
         debts = cls.get_debts_for_seller(seller)
         total_debt = debts.aggregate(total=Sum('amount'))['total']
-        return total_debt if total_debt else MoneyField(0, 'IRR')
+        if total_debt is None:
+            return Money(0, DEFAULT_CURRENCY)
+        return total_debt
 
     def update_description(self, new_description):
         """
@@ -321,7 +934,17 @@ class Refund(models.Model):
         """
         تابعی برای ایجاد یک تراکنش بازپرداخت
         """
-        refund = Refund(customer=customer, amount=amount, description=description)
+        currency_code = (
+            amount.currency.code if isinstance(amount, Money) else DEFAULT_CURRENCY
+        )
+        money_amount = _ensure_money(amount, currency=currency_code)
+        if money_amount.amount < 0:
+            raise ValidationError("Refund amount cannot be negative.")
+        refund = Refund(
+            customer=customer,
+            amount=money_amount,
+            description=description,
+        )
         refund.save()
         return refund
 
@@ -410,9 +1033,24 @@ class LoanApplication(models.Model):
     is_active = models.BooleanField(default=True)
 
     def _compute_total_amounts(self):
-    # محاسبه موارد مختلفی نظیر مبلغ باقی‌مانده، مجموع پرداختی و مجموع سودهاست
-        total_interests = self.loanpayment_set.filter(is_paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
-        total_payments = self.loanpayment_set.filter(is_paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+        """محاسبه مبلغ باقی‌مانده، مجموع پرداختی و مجموع سودها"""
+
+        if self.loan_amount is None:
+            raise ValidationError("Loan amount must be set before computing totals.")
+
+        loan_currency = self.loan_amount.currency.code
+        total_interests = (
+            self.loanpayment_set.filter(is_paid=True)
+            .aggregate(Sum('amount'))
+            .get('amount__sum')
+        )
+        total_payments = (
+            self.loanpayment_set.filter(is_paid=True)
+            .aggregate(Sum('amount'))
+            .get('amount__sum')
+        )
+        total_interests = total_interests or Money(0, loan_currency)
+        total_payments = total_payments or Money(0, loan_currency)
         self.interests_amount = total_interests
         self.payment_amount = total_payments
         self.pending_principal_amount = self.loan_amount - total_payments
@@ -435,8 +1073,9 @@ class LoanApplication(models.Model):
         elif self.loan_type == "fixed-annuity-begin":
             # اگر نوع وام معادل با "fixed-annuity-begin" باشد، مبلغ ثابت برابر با مبلغ وام منهای مبلغ اولین اقساط است
             self.fixed_amount = self.loan_amount - self.fixed_loan_amount
+
     def _compute_rate_period(self):
-    # محاسبه نرخ دوره وام
+        """محاسبه نرخ دوره وام"""
         if self.rate_type == "napr":
             # اگر نوع نرخ معادل با "napr" باشد، نرخ دوره برابر با نرخ وام تقسیطی است
             self.rate_period = self.rate / self.periods
@@ -447,14 +1086,17 @@ class LoanApplication(models.Model):
             # اگر نوع نرخ معادل با "real" باشد، نرخ دوره برابر با نرخ واقعی است
             # در اینجا باید محاسبات مخصوص به نرخ واقعی انجام شود
             pass  # اینجا محاسبات مخصوص به نرخ واقعی را اضافه کنید
+
     def _compute_journal_type(self):
-        # محاسبه نوع ژورنال بر اساس ویژگی‌های وام
+        """محاسبه نوع ژورنال بر اساس ویژگی‌های وام"""
         if self.loan_type == "fixed-annuity" or self.loan_type == "fixed-annuity-begin":
             self.journal_type = "fixed-annuity-journal"
         else:
             self.journal_type = "other-journal"
+
     def calculate_monthly_payment(self):
-        # محاسبه پرداخت ماهیانه
+        """محاسبه پرداخت ماهیانه"""
+
         if self.periods == 0:
             return 0
 
@@ -466,26 +1108,31 @@ class LoanApplication(models.Model):
         return monthly_payment
 
     def approve_loan(self):
-        # تایید وام
+        """تایید وام"""
+
         self.state = "posted"
         self.save()
 
     def cancel_loan(self):
-        # انصراف از وام
+        """انصراف از وام"""
+
         self.state = "cancelled"
         self.save()
 
     def close_loan(self):
-        # بسته شدن وام
+        """بسته شدن وام"""
+
         self.state = "closed"
         self.save()
 
     def generate_schedule(self):
-        # تولید برنامه پرداخت
-        pass  # اینجا باید تولید برنامه پرداخت وام انجام شود
+        """تولید برنامه پرداخت (در حال حاضر پیاده‌سازی نشده است)"""
+
+        pass
 
     def calculate_outstanding_balance(self):
-        # محاسبه مانده وام
+        """محاسبه مانده وام"""
+
         outstanding_balance = self.pending_principal_amount + self.interests_amount
         return outstanding_balance
 

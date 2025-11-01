@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/TaxOperation/';
+const API_ENDPOINT = '/TaxOperation/';
 
 const TaxOperationComponent = () => {
   const [taxOperations, setTaxOperations] = useState([]);
@@ -9,6 +9,7 @@ const TaxOperationComponent = () => {
     user: '',
     operation_type: '',
     amount: '',
+
     // other fields
   });
   const [editingTaxOperation, setEditingTaxOperation] = useState(null);
@@ -19,7 +20,7 @@ const TaxOperationComponent = () => {
 
   const fetchTaxOperations = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setTaxOperations(response.data);
     } catch (error) {
       console.error('Error fetching tax operations:', error);
@@ -28,12 +29,13 @@ const TaxOperationComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newTaxOperation);
+      await apiClient.post(API_ENDPOINT, newTaxOperation);
       fetchTaxOperations();
       setNewTaxOperation({
         user: '',
         operation_type: '',
         amount: '',
+
         // reset other fields
       });
     } catch (error) {
@@ -47,7 +49,7 @@ const TaxOperationComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingTaxOperation.id}/`, editingTaxOperation);
+      await apiClient.put(`${API_ENDPOINT}${editingTaxOperation.id}/`, editingTaxOperation);
       fetchTaxOperations();
       setEditingTaxOperation(null);
     } catch (error) {
@@ -57,7 +59,7 @@ const TaxOperationComponent = () => {
 
   const handleDelete = async (taxOperationId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${taxOperationId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${taxOperationId}/`);
       fetchTaxOperations();
     } catch (error) {
       console.error('Error deleting tax operation:', error);

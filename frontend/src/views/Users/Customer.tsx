@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const CustomerComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const CustomerComponent = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/customers/');
+      const response = await apiClient.get('/customers/');
       setCustomers(response.data);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -38,7 +38,7 @@ const CustomerComponent = () => {
 
   const handleDelete = async (customerId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/customers/${customerId}/`);
+      const response = await apiClient.delete(`/customers/${customerId}/`);
       console.log('Customer deleted successfully:', response.data);
       fetchCustomers(); // Fetch customers again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const CustomerComponent = () => {
     try {
       if (editingCustomer) {
         // Update existing customer
-        const response = await axios.put(`http://localhost:8000/customers/${editingCustomer.id}/`, editingCustomer);
+        const response = await apiClient.put(`/customers/${editingCustomer.id}/`, editingCustomer);
         console.log('Customer updated successfully:', response.data);
       } else {
         // Create new customer
         const newCustomer = {
           phone_number: '', // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/customers/', newCustomer);
+        const response = await apiClient.post('/customers/', newCustomer);
         console.log('New customer added successfully:', response.data);
       }
 

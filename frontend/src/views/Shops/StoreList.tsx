@@ -1,6 +1,7 @@
 // components/Store.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface Store {
   id: number;
@@ -10,18 +11,22 @@ interface Store {
     id: number;
     latitude: number | null;
     longitude: number | null;
+
     // Add other fields from your Address model as needed
   };
   managers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   cashiers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   apprentice: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
 }
@@ -30,7 +35,7 @@ const StoreList: React.FC = () => {
   const [store, setStore] = useState<Store[]>([]);
 
   useEffect(() => {
-    axios.get<Store[]>('http://localhost:8000/stores/')
+    apiClient.get<Store[]>('/stores/')
       .then(response => {
         setStore(response.data);
       })

@@ -16,7 +16,7 @@ import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import EditOutline from 'mdi-material-ui/PencilOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const OpportunityComponent = () => {
   // ** State
@@ -31,7 +31,7 @@ const OpportunityComponent = () => {
 
   const fetchOpportunities = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Opportunity/');
+      const response = await apiClient.get('/Opportunity/');
       setOpportunities(response.data);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
@@ -44,7 +44,7 @@ const OpportunityComponent = () => {
 
   const handleDelete = async (opportunityId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Opportunity/${opportunityId}/`);
+      const response = await apiClient.delete(`/Opportunity/${opportunityId}/`);
       console.log('Opportunity deleted successfully:', response.data);
       fetchOpportunities(); // Fetch opportunities again after deletion
     } catch (error) {
@@ -56,7 +56,7 @@ const OpportunityComponent = () => {
     try {
       if (editingOpportunity) {
         // Update existing opportunity
-        const response = await axios.put(`http://localhost:8000/Opportunity/${editingOpportunity.id}/`, editingOpportunity);
+        const response = await apiClient.put(`/Opportunity/${editingOpportunity.id}/`, editingOpportunity);
         console.log('Opportunity updated successfully:', response.data);
       } else {
         // Create new opportunity
@@ -77,7 +77,7 @@ const OpportunityComponent = () => {
           tags: [],
           teams: [],
         };
-        const response = await axios.post('http://localhost:8000/Opportunity/', newOpportunity);
+        const response = await apiClient.post('/Opportunity/', newOpportunity);
         console.log('New opportunity added successfully:', response.data);
       }
 

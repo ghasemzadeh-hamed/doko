@@ -11,8 +11,9 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
-const API_ENDPOINT = 'http://localhost:8000/ControlAndMonitoring/';
+import apiClient from 'src/services/apiClient';
+
+const API_ENDPOINT = '/ControlAndMonitoring/';
 
 const ControlAndMonitoringComponent = () => {
   // ** State
@@ -26,7 +27,7 @@ const ControlAndMonitoringComponent = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -39,7 +40,7 @@ const ControlAndMonitoringComponent = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${itemId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${itemId}/`);
       console.log('Item deleted successfully:', response.data);
       fetchItems(); // Fetch items again after deletion
     } catch (error) {
@@ -51,14 +52,14 @@ const ControlAndMonitoringComponent = () => {
     try {
       if (editingItem) {
         // Update existing item
-        const response = await axios.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
         console.log('Item updated successfully:', response.data);
       } else {
         // Create new item
         const newItem = {
           // Add other fields as needed
         };
-        const response = await axios.post(API_ENDPOINT, newItem);
+        const response = await apiClient.post(API_ENDPOINT, newItem);
         console.log('New item added successfully:', response.data);
       }
 

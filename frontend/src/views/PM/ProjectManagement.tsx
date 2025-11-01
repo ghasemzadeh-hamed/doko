@@ -11,10 +11,11 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // ** Constants
-const API_ENDPOINT = 'http://localhost:8000/ProjectManagement/';
+const API_ENDPOINT = '/ProjectManagement/';
 
 const ProjectManagementComponent = () => {
   // ** State
@@ -28,7 +29,7 @@ const ProjectManagementComponent = () => {
 
   const fetchProjectManagements = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setProjectManagements(response.data);
     } catch (error) {
       console.error('Error fetching project managements:', error);
@@ -41,7 +42,7 @@ const ProjectManagementComponent = () => {
 
   const handleDelete = async (projectManagementId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${projectManagementId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${projectManagementId}/`);
       console.log('Project management deleted successfully');
       fetchProjectManagements(); // Fetch project managements again after deletion
     } catch (error) {
@@ -53,14 +54,14 @@ const ProjectManagementComponent = () => {
     try {
       if (editingProjectManagement) {
         // Update existing project management
-        await axios.put(`${API_ENDPOINT}${editingProjectManagement.id}/`, editingProjectManagement);
+        await apiClient.put(`${API_ENDPOINT}${editingProjectManagement.id}/`, editingProjectManagement);
         console.log('Project management updated successfully');
       } else {
         // Create new project management
         const newProjectManagement = {
           // Add other fields as needed
         };
-        await axios.post(API_ENDPOINT, newProjectManagement);
+        await apiClient.post(API_ENDPOINT, newProjectManagement);
         console.log('New project management added successfully');
       }
 
