@@ -1,5 +1,15 @@
 # Doko Platform
 
+<p align="center">
+  <a href="https://github.com/sponsors/ghasemzadeh-hamed" target="_blank" rel="noopener">
+    <img src="https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-black?logo=githubsponsors" alt="Sponsor on GitHub">
+  </a>
+  &nbsp;
+  <a href="https://tronscan.org/#/address/TFF6hgmr5h5fy8sEJS8sLYN81pm4rarkDM" target="_blank" rel="noopener">
+    <img src="https://img.shields.io/badge/Donate-TRX%20(TRON)-red?logo=tron" alt="Donate TRX (TRON)">
+  </a>
+</p>
+
 Doko is a modular operations platform that combines e-commerce, logistics, CRM, HR, and finance
 components. The repository contains a Django monolith that exposes REST APIs, a FastAPI service for
 lightweight integrations, and a Next.js admin interface based on the Materio template.
@@ -14,6 +24,7 @@ lightweight integrations, and a Next.js admin interface based on the Materio tem
 - [Integrity & stability checks](#integrity--stability-checks)
 - [Service quick starts](#service-quick-starts)
 - [Contributing](#contributing)
+- [💸 Donate (Crypto)](#-donate-crypto)
 - [ERP capability roadmap](#erp-capability-roadmap)
 - [License / مجوز](#license--مجوز)
 
@@ -239,6 +250,15 @@ npm run gen:types
 
 Please ensure sensitive credentials are never committed to version control and review the security
 settings before going live.
+
+## 💸 Donate (Crypto)
+
+**TRON (TRX)**  
+Address: `TFF6hgmr5h5fy8sEJS8sLYN81pm4rarkDM`  
+
+[![Donate TRX](https://img.shields.io/badge/Donate-TRX%20(TRON)-red?logo=tron)](https://tronscan.org/#/address/TFF6hgmr5h5fy8sEJS8sLYN81pm4rarkDM)
+
+> Only send **TRX / TRC20** assets to this address.
 
 ## ERP capability roadmap
 
