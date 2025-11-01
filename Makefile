@@ -1,32 +1,47 @@
-.PHONY: install-backend install-frontend migrate runserver fastapi fmt lint-backend lint-frontend lint test
+PYTHON ?= python
+PIP ?= pip
+FRONTEND_DIR := frontend
 
-install-backend:
-	pip install -r requirements.txt
+.PHONY: init precommit lint fmt lint-backend lint-frontend fmt-backend fmt-frontend test backend frontend clean
 
-install-frontend:
-	npm install
+init:
+	$(PIP) install --upgrade pip
+	$(PIP) install -r requirements.txt
+	npm install --prefix $(FRONTEND_DIR)
+	pre-commit install
 
-migrate:
-	python manage.py migrate
-
-runserver:
-	python manage.py runserver
-
-fastapi:
-	uvicorn fastapi_app.main:app --reload
-
-fmt:
+precommit:
 	pre-commit run --all-files
+
+lint: lint-backend lint-frontend
+
+fmt: fmt-backend fmt-frontend
 
 lint-backend:
 	black --check .
 	isort --check-only --profile=black .
 	flake8
 
-lint-frontend:
-	npm run lint
+fmt-backend:
+	black .
+	isort --profile=black .
 
-lint: lint-backend lint-frontend
+lint-frontend:
+	npm run lint --prefix $(FRONTEND_DIR) -- --fix=false
+
+fmt-frontend:
+	npm run lint --prefix $(FRONTEND_DIR)
+	npm run format --prefix $(FRONTEND_DIR)
 
 test:
-	python manage.py test
+	$(PYTHON) manage.py test
+
+backend:
+	$(PYTHON) manage.py runserver 0.0.0.0:8000
+
+frontend:
+	npm run dev --prefix $(FRONTEND_DIR)
+
+clean:
+	rm -rf __pycache__ */__pycache__
+	rm -rf $(FRONTEND_DIR)/.next $(FRONTEND_DIR)/node_modules

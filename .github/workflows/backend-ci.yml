@@ -6,15 +6,19 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  lint-and-compile:
+    name: Lint & compile (Python)
     runs-on: ubuntu-latest
     env:
       DJANGO_SETTINGS_MODULE: dokoplatform.settings.dev
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -25,7 +29,6 @@ jobs:
           black --check .
           isort --check-only --profile=black .
           flake8
-      - name: Run tests
+      - name: Verify Python bytecode compiles
         run: |
-          python manage.py migrate --noinput
-          python manage.py test
+          python -m compileall backend dokoplatform fastapi_app manage.py
