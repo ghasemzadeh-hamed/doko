@@ -1,19 +1,103 @@
+# General
+*.py[cod]
+*$py.class
 __pycache__/
-*.pyc
-.venv/
-.env
-.env.*
-!.env.example
-dist/
+
+# Distribution / packaging
 build/
+dist/
+wheels/
 *.egg-info/
-.vscode/
-node_modules/
-frontend/node_modules/
-frontend/.yarn/
-frontend/.pnp.*
-frontend/.env.local
-frontend/.env
-frontend/.next/
+.eggs/
+MANIFEST
+
+# Python environments
+.venv/
+venv/
+env/
+ENV/
+.env.bak
+pip-wheel-metadata/
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django / FastAPI
 *.sqlite3
 *.sqlite
+*.db
+*.db-*
+*.log
+local_settings.py
+media/
+staticfiles/
+celerybeat-schedule
+
+# Environment files & secrets
+.env
+.env.*
+*.env
+!*.env.example
+!*.env.sample
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.cer
+*.der
+secrets.*
+
+# Coverage / testing
+.coverage*
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+pytestdebug.log
+
+# Type checkers
+.pytype/
+.dmypy.json
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/.next/
+.next/
+out/
+.yarn/
+.yarn-cache/
+.pnp*
+.npm/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+static/build/
+frontend/build/
+frontend/dist/
+
+# Project specific
+pyvenv.cfg
+coverage/
+logs/
+/tmp/
+
