@@ -1,10 +1,23 @@
 # Doko Platform
 
 Doko is a modular operations platform that combines e-commerce, logistics, CRM, HR, and finance
-components. The repository contains a Django monolith that exposes REST APIs, a FastAPI service
-for lightweight integrations, and a Next.js admin interface based on the Materio template.
+components. The repository contains a Django monolith that exposes REST APIs, a FastAPI service for
+lightweight integrations, and a Next.js admin interface based on the Materio template.
 
-## Repository layout
+## Table of contents
+
+- [Architecture overview](#architecture-overview)
+- [Prerequisites](#prerequisites)
+- [Installation (English)](#installation-english)
+- [راهنمای نصب (فارسی)](#راهنمای-نصب-فارسی)
+- [Environment variables](#environment-variables)
+- [Integrity & stability checks](#integrity--stability-checks)
+- [Service quick starts](#service-quick-starts)
+- [Contributing](#contributing)
+- [ERP capability roadmap](#erp-capability-roadmap)
+- [License / مجوز](#license--مجوز)
+
+## Architecture overview
 
 | Path | Description |
 | --- | --- |
@@ -17,52 +30,178 @@ for lightweight integrations, and a Next.js admin interface based on the Materio
 | `requirements.txt` | Python backend dependencies. |
 | `package.json` | Root-level JavaScript dependencies shared across tooling. |
 
-## Secure quick start
+## Prerequisites
 
-1. Copy the provided example environment file and tailor it to your deployment:
+Before installing, ensure the following tooling is available:
+
+- Python 3.11+
+- Node.js 18+ and npm
+- PostgreSQL 13+ for production deployments (SQLite is supported for local development)
+- Redis (required when enabling Django Channels or background workers)
+- `virtualenv`/`venv` for Python isolation and `make` for the provided helper targets
+
+Clone the repository and optionally create a Python virtual environment:
+
+```bash
+git clone https://github.com/<your-org>/doko.git
+cd doko
+python -m venv .venv
+source .venv/bin/activate
+```
+
+## Installation (English)
+
+1. **Copy the environment template**
 
    ```bash
    cp .env.example .env
    ```
 
-   Populate `DJANGO_SECRET_KEY`, configure `DJANGO_ALLOWED_HOSTS`, and set your PostgreSQL, Redis,
-   and frontend variables before running in production. For local development you can keep the
-   defaults or point the settings at a SQLite database by exporting `DJANGO_DB_ENGINE=django.db.backends.sqlite3`.
-2. Create and activate a Python virtual environment and install dependencies via the provided
-   `Makefile` helpers:
+   Update the secrets (`DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`) and database credentials before
+   deploying. For local development you can omit the PostgreSQL settings to fall back to SQLite.
+
+2. **Install backend dependencies**
 
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   make install-backend
+   pip install -r requirements.txt
    ```
-3. Apply migrations and launch the backend services:
+
+   > If your environment restricts internet access, mirror the packages to an internal index or use
+   > the `Makefile` target `make init` after configuring your proxy.
+
+3. **Install frontend dependencies**
 
    ```bash
-   make migrate
-   make runserver
+   npm install
    ```
 
-4. (Optional) Start the FastAPI integration service and the Next.js dashboard in separate shells:
+4. **Apply database migrations**
 
    ```bash
-   make fastapi
-   cd frontend && npm run dev
+   python manage.py migrate
    ```
 
-Redis is required when enabling Django Channels or background workers. Provision an instance (for
-example, via Docker or a managed cloud service) and surface its connection string through
-`REDIS_URL`.
+5. **Run development services**
 
-## Backend (Django) quick start
+   ```bash
+   python manage.py runserver 0.0.0.0:8000   # Django API
+   uvicorn fastapi_app.main:app --reload      # Optional FastAPI integration service
+   npm run dev                                # Next.js dashboard on http://localhost:3000
+   ```
 
-The backend now defaults to PostgreSQL credentials sourced from environment variables. Production
+6. **Generate TypeScript API clients (optional)**
+
+   ```bash
+   npm run gen:types
+   ```
+
+## راهنمای نصب (فارسی)
+
+۱. **فایل تنظیمات نمونه را کپی کنید**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   مقادیر `DJANGO_SECRET_KEY`، `DJANGO_ALLOWED_HOSTS` و اطلاعات پایگاه‌داده را متناسب با محیط خود
+   تنظیم کنید. برای توسعهٔ محلی می‌توانید از تنظیمات پیش‌فرض (SQLite) استفاده کنید.
+
+۲. **پیش‌نیازهای بک‌اند را نصب کنید**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   > در صورت محدودیت دسترسی به اینترنت، پکیج‌ها را در یک مخزن داخلی آینه کنید یا پس از تنظیم
+   > پراکسی از دستور `make init` استفاده نمایید.
+
+۳. **پکیج‌های فرانت‌اند را نصب کنید**
+
+   ```bash
+   npm install
+   ```
+
+۴. **مهاجرت‌های پایگاه‌داده را اعمال کنید**
+
+   ```bash
+   python manage.py migrate
+   ```
+
+۵. **سرویس‌ها را اجرا کنید**
+
+   ```bash
+   python manage.py runserver 0.0.0.0:8000   # سرویس Django
+   uvicorn fastapi_app.main:app --reload      # سرویس FastAPI (اختیاری)
+   npm run dev                                # داشبورد Next.js روی آدرس http://localhost:3000
+   ```
+
+۶. **تولید کلاینت‌های TypeScript (اختیاری)**
+
+   ```bash
+   npm run gen:types
+   ```
+
+## Environment variables
+
+The `.env.example` file documents all supported keys. Key values required for production are:
+
+- `DJANGO_SECRET_KEY`
+- `DJANGO_ALLOWED_HOSTS`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+- `REDIS_URL` when enabling Channels or task queues
+- `NEXT_PUBLIC_API_BASE_URL` for the frontend build pipeline
+
+Set `DJANGO_SETTINGS_MODULE` to `backend.settings.prod` in production environments so that the
+hardening checks (e.g. `DEBUG=False`, secure cookies, PostgreSQL enforcement) take effect.
+
+## Integrity & stability checks
+
+Use the following commands to validate the stack before deploying:
+
+- **Backend unit tests**
+
+  ```bash
+  pytest
+  ```
+
+  The test suite relies on `pytest-django`; install it via `pip install -r requirements.txt`. When
+  running in restricted networks, configure pip to reach your internal Python package index.
+
+- **Django test runner (alternative)**
+
+  ```bash
+  python manage.py test
+  ```
+
+- **Backend linting & formatting**
+
+  ```bash
+  make lint-backend
+  make fmt-backend    # Auto-formats with black and isort
+  ```
+
+- **Frontend linting**
+
+  ```bash
+  npm run lint
+  ```
+
+- **Security hardening review**
+
+  Consult [`README_HARDENING.md`](README_HARDENING.md) for production security
+  recommendations, including SSL enforcement, secure cookies, and infrastructure hardening.
+
+## Service quick starts
+
+### Backend (Django)
+
+The backend defaults to PostgreSQL credentials sourced from environment variables. Production
 deployments **must** set `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, and the `POSTGRES_*` values.
 For development, the `dev` settings module gracefully falls back to SQLite if PostgreSQL variables
-are absent. Use `DJANGO_SETTINGS_MODULE=backend.settings.prod` when running collectstatic or
+are absent. Use `DJANGO_SETTINGS_MODULE=backend.settings.prod` when running `collectstatic` or
 deploying.
 
-## FastAPI service
+### FastAPI service
 
 The `fastapi_app/main.py` module exposes an auxiliary API. Run it locally with:
 
@@ -72,7 +211,7 @@ uvicorn fastapi_app.main:app --reload
 
 You can proxy this service behind the primary Django app or deploy it independently.
 
-## Frontend (Next.js) dashboard
+### Frontend (Next.js) dashboard
 
 The `frontend` directory contains the Materio-based admin interface.
 
@@ -90,26 +229,6 @@ With the Django API running locally, generate updated TypeScript definitions for
 ```bash
 npm run gen:types
 ```
-
-## Environment variables
-
-The `.env.example` file documents all supported keys. Key values required for production are:
-
-- `DJANGO_SECRET_KEY`
-- `DJANGO_ALLOWED_HOSTS`
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
-- `REDIS_URL` when enabling Channels or task queues
-- `NEXT_PUBLIC_API_BASE_URL` for the frontend build pipeline
-
-Set `DJANGO_SETTINGS_MODULE` to `backend.settings.prod` in production environments so that the
-hardening checks (e.g. `DEBUG=False`, secure cookies, PostgreSQL enforcement) take effect.
-
-## Running linting and formatting
-
-- **Backend:** `make fmt` runs the configured `pre-commit` hooks locally, while `make lint-backend`
-  performs `black --check`, `isort`, and `flake8` validation.
-- **Frontend:** `npm run lint` (also exposed via `make lint-frontend`) executes the ESLint rules and
-  Prettier formatting checks used by CI.
 
 ## Contributing
 
@@ -138,7 +257,7 @@ purchase, POS, helpdesk, HR/payroll, marketing, etc.). To coordinate the build-o
 Keep the roadmap updated as teams deliver modules or change priorities so that contributors have
 clear guidance on integration requirements and long-term direction.
 
-## License and Copyright / مجوز و حق‌کپی
+## License / مجوز
 
 **English:** This project is released under the MIT License. You are free to use, modify, and
 distribute the software, provided that the original copyright notice and permission notice are
