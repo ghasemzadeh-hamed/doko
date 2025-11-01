@@ -115,6 +115,23 @@ hardening checks (e.g. `DEBUG=False`, secure cookies, PostgreSQL enforcement) ta
 Please ensure sensitive credentials are never committed to version control and review the security
 settings before going live.
 
+## ERP capability roadmap
+
+The current codebase provides foundational models and an administrative UI, but it does not yet
+ship the full breadth of ERP features (advanced CRM pipelines, warehouse management, accounting,
+purchase, POS, helpdesk, HR/payroll, marketing, etc.). To coordinate the build-out, see
+[`staff-documents/ERP_Roadmap.md`](staff-documents/ERP_Roadmap.md) for:
+
+- A snapshot of missing functionality across backend and frontend services.
+- Strategic options (Odoo integration vs. native lightweight modules vs. AI-first differentiation).
+- A prioritized backlog (P0/P1/P2) covering CRM, WMS, Sales, Purchase, POS, Accounting, Helpdesk,
+  HR, and additional verticals.
+- Immediate next steps to align stakeholders, harden infrastructure, and scope the highest-value
+  modules.
+
+Keep the roadmap updated as teams deliver modules or change priorities so that contributors have
+clear guidance on integration requirements and long-term direction.
+
 ## License and Copyright / مجوز و حق‌کپی
 
 **English:** This project is released under the MIT License. You are free to use, modify, and
