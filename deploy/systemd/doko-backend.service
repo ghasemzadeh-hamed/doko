@@ -1,0 +1,12 @@
+[Unit]
+Description=Doko Django (gunicorn)
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/doko
+ExecStart=/opt/doko/.venv/bin/gunicorn backend.wsgi:application --bind 127.0.0.1:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

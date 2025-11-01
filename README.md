@@ -8,8 +8,8 @@ for lightweight integrations, and a Next.js admin interface based on the Materio
 
 | Path | Description |
 | --- | --- |
-| `dokoplatform/` | Django project configuration (settings, URLs, Channels, dashboards). |
-| `backend/` | Core Django app with domain modules for users, orders, finance, logistics, HR, CRM, and more. |
+| `backend/` | Django project configuration (settings, URLs, ASGI/WSGI). |
+| `apps/` | Domain Django apps for partners, catalog, inventory, sales, purchase, CRM, and helpdesk. |
 | `fastapi_app/` | Stand-alone FastAPI microservice (`main.py`). |
 | `frontend/` | Next.js admin dashboard (`materio-mui-react-nextjs-admin-template`). |
 | `templates/`, `static/` | Server-rendered templates and static assets for the Django admin/apps. |
@@ -59,7 +59,7 @@ example, via Docker or a managed cloud service) and surface its connection strin
 The backend now defaults to PostgreSQL credentials sourced from environment variables. Production
 deployments **must** set `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, and the `POSTGRES_*` values.
 For development, the `dev` settings module gracefully falls back to SQLite if PostgreSQL variables
-are absent. Use `DJANGO_SETTINGS_MODULE=dokoplatform.settings.prod` when running collectstatic or
+are absent. Use `DJANGO_SETTINGS_MODULE=backend.settings.prod` when running collectstatic or
 deploying.
 
 ## FastAPI service
@@ -85,6 +85,12 @@ npm run dev
 The dev server runs on port 3000 by default. Update the API base URLs in the frontend source to
 point at your running Django/FastAPI instances.
 
+With the Django API running locally, generate updated TypeScript definitions for API clients via:
+
+```bash
+npm run gen:types
+```
+
 ## Environment variables
 
 The `.env.example` file documents all supported keys. Key values required for production are:
@@ -95,7 +101,7 @@ The `.env.example` file documents all supported keys. Key values required for pr
 - `REDIS_URL` when enabling Channels or task queues
 - `NEXT_PUBLIC_API_BASE_URL` for the frontend build pipeline
 
-Set `DJANGO_SETTINGS_MODULE` to `dokoplatform.settings.prod` in production environments so that the
+Set `DJANGO_SETTINGS_MODULE` to `backend.settings.prod` in production environments so that the
 hardening checks (e.g. `DEBUG=False`, secure cookies, PostgreSQL enforcement) take effect.
 
 ## Running linting and formatting
