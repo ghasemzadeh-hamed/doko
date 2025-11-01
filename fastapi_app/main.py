@@ -20,7 +20,7 @@ import os
 from collections import defaultdict
 from typing import Any, Dict, List
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dokoplatform.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dokoplatform.settings.dev")
 
 import django
 
