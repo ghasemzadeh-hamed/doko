@@ -1,5 +1,6 @@
 // components/DocumentList.tsx
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 
 // components/EditDocument.tsx
@@ -29,7 +30,7 @@ const EditDocument: React.FC<EditDocumentProps> = ({ documentId }) => {
 
   useEffect(() => {
     // Fetch the document data by ID and populate the form
-    axios.get(`http://localhost:8000/Document/${documentId}/`)
+    apiClient.get(`/Document/${documentId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -58,7 +59,7 @@ const EditDocument: React.FC<EditDocumentProps> = ({ documentId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/Document/${documentId}/`, formData);
+      const response = await apiClient.put(`/Document/${documentId}/`, formData);
       console.log('Document updated successfully:', response.data);
     } catch (error) {
       console.error('Error updating document:', error);

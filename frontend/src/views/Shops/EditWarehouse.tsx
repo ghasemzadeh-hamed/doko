@@ -1,7 +1,7 @@
-
 // components/EditWarehouse.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditWarehouseProps {
   warehouseId: number;
@@ -27,7 +27,7 @@ const EditWarehouse: React.FC<EditWarehouseProps> = ({ warehouseId }) => {
   });
 
   useEffect(() => {
-    axios.get<Warehouse>(`http://localhost:8000/Warehouse/${warehouseId}/`)
+    apiClient.get<Warehouse>(`/Warehouse/${warehouseId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -54,8 +54,9 @@ const EditWarehouse: React.FC<EditWarehouseProps> = ({ warehouseId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/Warehouse/${warehouseId}/`, formData);
+      const response = await apiClient.put(`/Warehouse/${warehouseId}/`, formData);
       console.log('Warehouse updated successfully:', response.data);
+
       // You can perform additional actions after updating the warehouse
     } catch (error) {
       console.error('Error updating warehouse:', error);

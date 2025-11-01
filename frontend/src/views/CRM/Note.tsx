@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const NoteComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const NoteComponent = () => {
 
   const fetchNotes = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Note/');
+      const response = await apiClient.get('/Note/');
       setNotes(response.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -43,7 +43,7 @@ const NoteComponent = () => {
 
   const handleDelete = async (noteId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Note/${noteId}/`);
+      const response = await apiClient.delete(`/Note/${noteId}/`);
       console.log('Note deleted successfully:', response.data);
       fetchNotes(); // Fetch notes again after deletion
     } catch (error) {
@@ -55,7 +55,7 @@ const NoteComponent = () => {
     try {
       if (editingNote) {
         // Update existing note
-        const response = await axios.put(`http://localhost:8000/Note/${editingNote.id}/`, editingNote);
+        const response = await apiClient.put(`/Note/${editingNote.id}/`, editingNote);
         console.log('Note updated successfully:', response.data);
       } else {
         // Create new note
@@ -63,7 +63,7 @@ const NoteComponent = () => {
           content: '',
           user: null,
         };
-        const response = await axios.post('http://localhost:8000/Note/', newNote);
+        const response = await apiClient.post('/Note/', newNote);
         console.log('New note added successfully:', response.data);
       }
 

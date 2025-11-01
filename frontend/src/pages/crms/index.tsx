@@ -25,6 +25,7 @@ import DocumentsComponent  from 'src/views/CRM/DocumentsComponent'
 import AttachmentsComponent   from 'src/views/CRM/AttachmentsComponent'
 import TicketComponent from "../../views/CRM/Ticket";
 import NoteComponent from "../../views/CRM/Note";
+
 // import ActivityComponent from "../../views/CRM/Activity";
 import OpportunityComponent from "../../views/CRM/Opportunity";
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AddLocation: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,8 +18,9 @@ const AddLocation: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/location/', formData);
+      const response = await apiClient.post('/location/', formData);
       console.log('Location added successfully:', response.data);
+
       // You can perform additional actions after adding the location
     } catch (error) {
       console.error('Error adding location:', error);

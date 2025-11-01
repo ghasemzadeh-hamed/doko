@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ManagerComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ManagerComponent = () => {
 
   const fetchManagers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/managers/');
+      const response = await apiClient.get('/managers/');
       setManagers(response.data);
     } catch (error) {
       console.error('Error fetching managers:', error);
@@ -38,7 +38,7 @@ const ManagerComponent = () => {
 
   const handleDelete = async (managerId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/managers/${managerId}/`);
+      const response = await apiClient.delete(`/managers/${managerId}/`);
       console.log('Manager deleted successfully:', response.data);
       fetchManagers(); // Fetch managers again after deletion
     } catch (error) {
@@ -50,7 +50,7 @@ const ManagerComponent = () => {
     try {
       if (editingManager) {
         // Update existing manager
-        const response = await axios.put(`http://localhost:8000/managers/${editingManager.id}/`, editingManager);
+        const response = await apiClient.put(`/managers/${editingManager.id}/`, editingManager);
         console.log('Manager updated successfully:', response.data);
       } else {
         // Create new manager
@@ -60,9 +60,10 @@ const ManagerComponent = () => {
           is_super_manager: false,
           is_technical_manager: false,
           is_support_manager: false,
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/managers/', newManager);
+        const response = await apiClient.post('/managers/', newManager);
         console.log('New manager added successfully:', response.data);
       }
 

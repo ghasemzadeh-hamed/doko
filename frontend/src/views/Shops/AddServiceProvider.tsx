@@ -1,7 +1,6 @@
-
 // components/AddServiceProvider.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AddServiceProvider: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -31,8 +30,9 @@ const AddServiceProvider: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/ServiceProvider/', formData);
+      const response = await apiClient.post('/ServiceProvider/', formData);
       console.log('Service Provider added successfully:', response.data);
+
       // You can perform additional actions after adding the service provider
     } catch (error) {
       console.error('Error adding service provider:', error);

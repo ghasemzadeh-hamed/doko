@@ -2,7 +2,7 @@
 import { ReactNode } from 'react'
 
 // ** MUI Imports
-import { styled, useTheme } from '@mui/material/styles'
+import { styled, useTheme, alpha } from '@mui/material/styles'
 import MuiAppBar, { AppBarProps } from '@mui/material/AppBar'
 import MuiToolbar, { ToolbarProps } from '@mui/material/Toolbar'
 
@@ -33,12 +33,18 @@ const AppBar = styled(MuiAppBar)<AppBarProps>(({ theme }) => ({
 
 const Toolbar = styled(MuiToolbar)<ToolbarProps>(({ theme }) => ({
   width: '100%',
-  borderBottomLeftRadius: 10,
-  borderBottomRightRadius: 10,
+  borderBottomLeftRadius: 18,
+  borderBottomRightRadius: 18,
   padding: `${theme.spacing(0)} !important`,
   minHeight: `${theme.mixins.toolbar.minHeight}px !important`,
-  transition:
-    'padding .25s ease-in-out, box-shadow .25s ease-in-out, backdrop-filter .25s ease-in-out, background-color .25s ease-in-out'
+  transition: 'padding .25s ease-in-out, box-shadow .25s ease-in-out, backdrop-filter .25s ease-in-out, background-color .25s ease-in-out',
+  background: 'var(--liquid-glass-surface)',
+  border: `1px solid ${
+    theme.palette.mode === 'light' ? alpha('#ffffff', 0.35) : alpha('#94a3b8', 0.18)
+  }`,
+  boxShadow: 'var(--liquid-glass-shadow)',
+  backdropFilter: 'var(--liquid-glass-backdrop)',
+  WebkitBackdropFilter: 'var(--liquid-glass-backdrop)'
 }))
 
 const LayoutAppBar = (props: Props) => {

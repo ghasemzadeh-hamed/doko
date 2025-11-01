@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const PlatformSettingsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const PlatformSettingsComponent = () => {
 
   const fetchPlatformSettings = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/PlatformSettings/');
+      const response = await apiClient.get('/PlatformSettings/');
       setPlatformSettings(response.data);
     } catch (error) {
       console.error('Error fetching platform settings:', error);
@@ -40,7 +40,7 @@ const PlatformSettingsComponent = () => {
     try {
       if (editingPlatformSetting) {
         // Update existing platform setting
-        const response = await axios.put(`http://localhost:8000/PlatformSettings/${editingPlatformSetting.id}/`, editingPlatformSetting);
+        const response = await apiClient.put(`/PlatformSettings/${editingPlatformSetting.id}/`, editingPlatformSetting);
         console.log('Platform setting updated successfully:', response.data);
         fetchPlatformSettings(); // Fetch platform settings again after updating
         setEditingPlatformSetting(null); // Clear editing state
@@ -52,7 +52,7 @@ const PlatformSettingsComponent = () => {
 
   const handleDelete = async (platformSettingId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/PlatformSettings/${platformSettingId}/`);
+      const response = await apiClient.delete(`/PlatformSettings/${platformSettingId}/`);
       console.log('Platform setting deleted successfully:', response.data);
       fetchPlatformSettings(); // Fetch platform settings again after deletion
     } catch (error) {

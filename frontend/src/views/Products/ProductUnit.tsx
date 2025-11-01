@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ProductUnitComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ProductUnitComponent = () => {
 
   const fetchProductUnits = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/ProductUnit/');
+      const response = await apiClient.get('/ProductUnit/');
       setProductUnits(response.data);
     } catch (error) {
       console.error('Error fetching product units:', error);
@@ -38,7 +38,7 @@ const ProductUnitComponent = () => {
 
   const handleDelete = async (productUnitId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/ProductUnit/${productUnitId}/`);
+      const response = await apiClient.delete(`/ProductUnit/${productUnitId}/`);
       console.log('Product unit deleted successfully:', response.data);
       fetchProductUnits(); // Fetch product units again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ProductUnitComponent = () => {
     try {
       if (editingProductUnit) {
         // Update existing product unit
-        const response = await axios.put(`http://localhost:8000/ProductUnit/${editingProductUnit.id}/`, editingProductUnit);
+        const response = await apiClient.put(`/ProductUnit/${editingProductUnit.id}/`, editingProductUnit);
         console.log('Product unit updated successfully:', response.data);
       } else {
         // Create new product unit
         const newProductUnit = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/ProductUnit/', newProductUnit);
+        const response = await apiClient.post('/ProductUnit/', newProductUnit);
         console.log('New product unit added successfully:', response.data);
       }
 

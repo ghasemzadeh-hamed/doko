@@ -1,6 +1,7 @@
 // components/WarehouseList.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface Warehouse {
   id: number;
@@ -14,18 +15,22 @@ interface Warehouse {
     id: number;
     latitude: number | null;
     longitude: number | null;
+
     // Add other fields from your Address model as needed
   };
   managers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   cashiers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   apprentice: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
 }
@@ -34,7 +39,7 @@ const WarehouseList: React.FC = () => {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
 
   useEffect(() => {
-    axios.get<Warehouse[]>('http://localhost:8000/Warehouse/')
+    apiClient.get<Warehouse[]>('/Warehouse/')
       .then(response => {
         setWarehouses(response.data);
       })

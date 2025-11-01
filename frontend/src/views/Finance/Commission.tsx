@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/Commission/';
+const API_ENDPOINT = '/Commission/';
 
 const CommissionComponent = () => {
   const [commissions, setCommissions] = useState([]);
@@ -13,7 +13,7 @@ const CommissionComponent = () => {
 
   const fetchCommissions = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setCommissions(response.data);
     } catch (error) {
       console.error('Error fetching commissions:', error);
@@ -22,7 +22,7 @@ const CommissionComponent = () => {
 
   const addCommission = async () => {
     try {
-      const response = await axios.post(API_ENDPOINT, newCommission);
+      const response = await apiClient.post(API_ENDPOINT, newCommission);
       console.log('New commission added successfully:', response.data);
       fetchCommissions();
       setNewCommission({ commission: null });
@@ -33,7 +33,7 @@ const CommissionComponent = () => {
 
   const editCommission = async (id, updatedCommission) => {
     try {
-      const response = await axios.put(`${API_ENDPOINT}${id}/`, updatedCommission);
+      const response = await apiClient.put(`${API_ENDPOINT}${id}/`, updatedCommission);
       console.log('Commission updated successfully:', response.data);
       fetchCommissions();
     } catch (error) {
@@ -43,7 +43,7 @@ const CommissionComponent = () => {
 
   const deleteCommission = async (id) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${id}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${id}/`);
       console.log('Commission deleted successfully:', response.data);
       fetchCommissions();
     } catch (error) {

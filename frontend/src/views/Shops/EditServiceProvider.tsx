@@ -1,6 +1,7 @@
 // components/EditServiceProvider.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditServiceProviderProps {
   serviceProviderId: number;
@@ -22,7 +23,7 @@ const EditServiceProvider: React.FC<EditServiceProviderProps> = ({ serviceProvid
   });
 
   useEffect(() => {
-    axios.get<ServiceProvider>(`http://localhost:8000/ServiceProvider/${serviceProviderId}/`)
+    apiClient.get<ServiceProvider>(`/ServiceProvider/${serviceProviderId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -49,8 +50,9 @@ const EditServiceProvider: React.FC<EditServiceProviderProps> = ({ serviceProvid
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/ServiceProvider/${serviceProviderId}/`, formData);
+      const response = await apiClient.put(`/ServiceProvider/${serviceProviderId}/`, formData);
       console.log('Service Provider updated successfully:', response.data);
+
       // You can perform additional actions after updating the service provider
     } catch (error) {
       console.error('Error updating service provider:', error);

@@ -11,7 +11,8 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** Axios Import
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // ** Budgeting Component
 const BudgetingComponent = () => {
@@ -26,7 +27,7 @@ const BudgetingComponent = () => {
 
   const fetchBudgetItems = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Budgeting/');
+      const response = await apiClient.get('/Budgeting/');
       setBudgetItems(response.data);
     } catch (error) {
       console.error('Error fetching budget items:', error);
@@ -39,7 +40,7 @@ const BudgetingComponent = () => {
 
   const handleDelete = async (budgetItemId) => {
     try {
-      await axios.delete(`${'http://localhost:8000/Budgeting/'}${budgetItemId}/`);
+      await apiClient.delete(`${'/Budgeting/'}${budgetItemId}/`);
       console.log('Budget item deleted successfully');
       fetchBudgetItems(); // Fetch budget items again after deletion
     } catch (error) {
@@ -51,14 +52,14 @@ const BudgetingComponent = () => {
     try {
       if (editingBudgetItem) {
         // Update existing budget item
-        await axios.put(`${'http://localhost:8000/Budgeting/'}${editingBudgetItem.id}/`, editingBudgetItem);
+        await apiClient.put(`${'/Budgeting/'}${editingBudgetItem.id}/`, editingBudgetItem);
         console.log('Budget item updated successfully');
       } else {
         // Create new budget item
         const newBudgetItem = {
           // Add other fields as needed
         };
-        await axios.post(API_ENDPOINT, newBudgetItem);
+        await apiClient.post(API_ENDPOINT, newBudgetItem);
         console.log('New budget item added successfully');
       }
 

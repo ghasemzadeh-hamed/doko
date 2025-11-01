@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/Salary/';
+const API_ENDPOINT = '/Salary/';
 
 const SalaryComponent = () => {
   const [salaries, setSalaries] = useState([]);
@@ -19,7 +19,7 @@ const SalaryComponent = () => {
 
   const fetchSalaries = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setSalaries(response.data);
     } catch (error) {
       console.error('Error fetching salaries:', error);
@@ -28,7 +28,7 @@ const SalaryComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newSalary);
+      await apiClient.post(API_ENDPOINT, newSalary);
       fetchSalaries();
       setNewSalary({
         user: '',
@@ -47,7 +47,7 @@ const SalaryComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingSalary.id}/`, editingSalary);
+      await apiClient.put(`${API_ENDPOINT}${editingSalary.id}/`, editingSalary);
       fetchSalaries();
       setEditingSalary(null);
     } catch (error) {
@@ -57,7 +57,7 @@ const SalaryComponent = () => {
 
   const handleDelete = async (salaryId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${salaryId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${salaryId}/`);
       fetchSalaries();
     } catch (error) {
       console.error('Error deleting salary:', error);

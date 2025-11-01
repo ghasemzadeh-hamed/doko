@@ -1,5 +1,6 @@
 // components/DocumentList.tsx
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Button } from '@mui/material';
 
@@ -15,6 +16,7 @@ interface AddDocumentProps {
   created_by: string;
   org: string;
   shared_to: string;
+
   // Add any props you might need
 }
 
@@ -49,7 +51,7 @@ const AddDocument: React.FC<AddDocumentProps> = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/Document/', formData, {
+      const response = await apiClient.post('/Document/', formData, {
         headers: {
           'Content-Type': 'application/json',
         },

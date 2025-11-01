@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const CRMTaskComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const CRMTaskComponent = () => {
 
   const fetchCRMTasks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/CRMTask/');
+      const response = await apiClient.get('/CRMTask/');
       setCRMTasks(response.data);
     } catch (error) {
       console.error('Error fetching CRM tasks:', error);
@@ -43,7 +43,7 @@ const CRMTaskComponent = () => {
 
   const handleDelete = async (crmTaskId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/CRMTask/${crmTaskId}/`);
+      const response = await apiClient.delete(`/CRMTask/${crmTaskId}/`);
       console.log('CRM task deleted successfully:', response.data);
       fetchCRMTasks(); // Fetch CRM tasks again after deletion
     } catch (error) {
@@ -55,7 +55,7 @@ const CRMTaskComponent = () => {
     try {
       if (editingCRMTask) {
         // Update existing CRM task
-        const response = await axios.put(`http://localhost:8000/CRMTask/${editingCRMTask.id}/`, editingCRMTask);
+        const response = await apiClient.put(`/CRMTask/${editingCRMTask.id}/`, editingCRMTask);
         console.log('CRM task updated successfully:', response.data);
       } else {
         // Create new CRM task
@@ -70,7 +70,7 @@ const CRMTaskComponent = () => {
           assigned_to: [],
           teams: [],
         };
-        const response = await axios.post('http://localhost:8000/CRMTask/', newCRMTask);
+        const response = await apiClient.post('/CRMTask/', newCRMTask);
         console.log('New CRM task added successfully:', response.data);
       }
 

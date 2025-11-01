@@ -1,7 +1,7 @@
-
 // components/DeleteWarehouse.tsx
 import React from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface DeleteWarehouseProps {
   warehouseId: number;
@@ -10,8 +10,9 @@ interface DeleteWarehouseProps {
 const DeleteWarehouse: React.FC<DeleteWarehouseProps> = ({ warehouseId }) => {
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Warehouse/${warehouseId}/`);
+      const response = await apiClient.delete(`/Warehouse/${warehouseId}/`);
       console.log('Warehouse deleted successfully:', response.data);
+
       // You can perform additional actions after deleting the warehouse
     } catch (error) {
       console.error('Error deleting warehouse:', error);

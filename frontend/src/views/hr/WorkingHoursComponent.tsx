@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import moment from 'moment';
 
@@ -13,7 +14,7 @@ const WorkingHoursComponent: React.FC = () => {
   const [workingHours, setWorkingHours] = useState<WorkingHoursData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/WorkingHours/')
+    apiClient.get('/WorkingHours/')
       .then(response => {
         setWorkingHours(response.data);
       })

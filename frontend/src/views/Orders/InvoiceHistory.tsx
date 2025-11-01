@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const InvoiceHistoryComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const InvoiceHistoryComponent = () => {
 
   const fetchInvoiceHistories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/InvoiceHistory/');
+      const response = await apiClient.get('/InvoiceHistory/');
       setInvoiceHistories(response.data);
     } catch (error) {
       console.error('Error fetching invoice histories:', error);
@@ -38,7 +38,7 @@ const InvoiceHistoryComponent = () => {
 
   const handleDelete = async (invoiceHistoryId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/InvoiceHistory/${invoiceHistoryId}/`);
+      const response = await apiClient.delete(`/InvoiceHistory/${invoiceHistoryId}/`);
       console.log('Invoice history deleted successfully:', response.data);
       fetchInvoiceHistories(); // Fetch invoice histories again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const InvoiceHistoryComponent = () => {
     try {
       if (editingInvoiceHistory) {
         // Update existing invoice history
-        const response = await axios.put(`http://localhost:8000/InvoiceHistory/${editingInvoiceHistory.id}/`, editingInvoiceHistory);
+        const response = await apiClient.put(`/InvoiceHistory/${editingInvoiceHistory.id}/`, editingInvoiceHistory);
         console.log('Invoice history updated successfully:', response.data);
       } else {
         // Create new invoice history
         const newInvoiceHistory = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/InvoiceHistory/', newInvoiceHistory);
+        const response = await apiClient.post('/InvoiceHistory/', newInvoiceHistory);
         console.log('New invoice history added successfully:', response.data);
       }
 

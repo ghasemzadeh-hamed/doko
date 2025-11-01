@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const TagsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const TagsComponent = () => {
 
   const fetchTags = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/tags/');
+      const response = await apiClient.get('/tags/');
       setTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
@@ -38,7 +38,7 @@ const TagsComponent = () => {
 
   const handleDelete = async (tagId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/tags/${tagId}/`);
+      const response = await apiClient.delete(`/tags/${tagId}/`);
       console.log('Tag deleted successfully:', response.data);
       fetchTags(); // Fetch tags again after deletion
     } catch (error) {
@@ -50,15 +50,16 @@ const TagsComponent = () => {
     try {
       if (editingTag) {
         // Update existing tag
-        const response = await axios.put(`http://localhost:8000/tags/${editingTag.id}/`, editingTag);
+        const response = await apiClient.put(`/tags/${editingTag.id}/`, editingTag);
         console.log('Tag updated successfully:', response.data);
       } else {
         // Create new tag
         const newTag = {
           name: '',
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/tags/', newTag);
+        const response = await apiClient.post('/tags/', newTag);
         console.log('New tag added successfully:', response.data);
       }
 

@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const StoreItemComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const StoreItemComponent = () => {
 
   const fetchStoreItems = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/StoreItem/');
+      const response = await apiClient.get('/StoreItem/');
       setStoreItems(response.data);
     } catch (error) {
       console.error('Error fetching store items:', error);
@@ -38,7 +38,7 @@ const StoreItemComponent = () => {
 
   const handleDelete = async (storeItemId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/StoreItem/${storeItemId}/`);
+      const response = await apiClient.delete(`/StoreItem/${storeItemId}/`);
       console.log('Store item deleted successfully:', response.data);
       fetchStoreItems(); // Fetch store items again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const StoreItemComponent = () => {
     try {
       if (editingStoreItem) {
         // Update existing store item
-        const response = await axios.put(`http://localhost:8000/StoreItem/${editingStoreItem.id}/`, editingStoreItem);
+        const response = await apiClient.put(`/StoreItem/${editingStoreItem.id}/`, editingStoreItem);
         console.log('Store item updated successfully:', response.data);
       } else {
         // Create new store item
         const newStoreItem = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/StoreItem/', newStoreItem);
+        const response = await apiClient.post('/StoreItem/', newStoreItem);
         console.log('New store item added successfully:', response.data);
       }
 

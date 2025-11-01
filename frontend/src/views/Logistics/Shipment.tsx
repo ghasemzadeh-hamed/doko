@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ShipmentComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ShipmentComponent = () => {
 
   const fetchShipments = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Shipment/');
+      const response = await apiClient.get('/Shipment/');
       setShipments(response.data);
     } catch (error) {
       console.error('Error fetching shipments:', error);
@@ -38,7 +38,7 @@ const ShipmentComponent = () => {
 
   const handleDelete = async (shipmentId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Shipment/${shipmentId}/`);
+      const response = await apiClient.delete(`/Shipment/${shipmentId}/`);
       console.log('Shipment deleted successfully:', response.data);
       fetchShipments(); // Fetch shipments again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ShipmentComponent = () => {
     try {
       if (editingShipment) {
         // Update existing shipment
-        const response = await axios.put(`http://localhost:8000/Shipment/${editingShipment.id}/`, editingShipment);
+        const response = await apiClient.put(`/Shipment/${editingShipment.id}/`, editingShipment);
         console.log('Shipment updated successfully:', response.data);
       } else {
         // Create new shipment
         const newShipment = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Shipment/', newShipment);
+        const response = await apiClient.post('/Shipment/', newShipment);
         console.log('New shipment added successfully:', response.data);
       }
 

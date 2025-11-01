@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/TotalSales/';
+const API_ENDPOINT = '/TotalSales/';
 
 const TotalSalesComponent = () => {
   const [totalSalesList, setTotalSalesList] = useState([]);
@@ -14,7 +14,7 @@ const TotalSalesComponent = () => {
 
   const fetchTotalSales = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setTotalSalesList(response.data);
     } catch (error) {
       console.error('Error fetching total sales:', error);
@@ -23,7 +23,7 @@ const TotalSalesComponent = () => {
 
   const handleAddSale = async () => {
     try {
-      await axios.post(API_ENDPOINT, { sales: newSaleAmount });
+      await apiClient.post(API_ENDPOINT, { sales: newSaleAmount });
       fetchTotalSales();
       setNewSaleAmount(0);
     } catch (error) {
@@ -37,7 +37,7 @@ const TotalSalesComponent = () => {
 
   const handleUpdateSale = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
+      await apiClient.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
       fetchTotalSales();
       setEditingItem(null);
     } catch (error) {
@@ -47,7 +47,7 @@ const TotalSalesComponent = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${itemId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${itemId}/`);
       fetchTotalSales();
     } catch (error) {
       console.error('Error deleting sale:', error);

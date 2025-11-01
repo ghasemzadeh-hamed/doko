@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/DataAnalysis/';
+const API_ENDPOINT = '/DataAnalysis/';
 
 const DataAnalysisComponent = () => {
   const [dataAnalysisItems, setDataAnalysisItems] = useState([]);
@@ -14,7 +14,7 @@ const DataAnalysisComponent = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setDataAnalysisItems(response.data);
     } catch (error) {
       console.error('Error fetching data analysis items:', error);
@@ -23,7 +23,7 @@ const DataAnalysisComponent = () => {
 
   const addItem = async () => {
     try {
-      const response = await axios.post(API_ENDPOINT, newItem);
+      const response = await apiClient.post(API_ENDPOINT, newItem);
       console.log('New data analysis item added successfully:', response.data);
       fetchItems();
       setNewItem({ project: '', data_sources: '', data_analysis_report: '', tag: [] });
@@ -38,7 +38,7 @@ const DataAnalysisComponent = () => {
 
   const updateItem = async () => {
     try {
-      const response = await axios.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
+      const response = await apiClient.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
       console.log('Data analysis item updated successfully:', response.data);
       fetchItems();
       setEditingItem(null);
@@ -49,7 +49,7 @@ const DataAnalysisComponent = () => {
 
   const deleteItem = async (itemId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${itemId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${itemId}/`);
       console.log('Data analysis item deleted successfully:', response.data);
       fetchItems();
     } catch (error) {

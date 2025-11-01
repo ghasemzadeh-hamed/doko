@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const CourierComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const CourierComponent = () => {
 
   const fetchCouriers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/couriers/');
+      const response = await apiClient.get('/couriers/');
       setCouriers(response.data);
     } catch (error) {
       console.error('Error fetching couriers:', error);
@@ -38,7 +38,7 @@ const CourierComponent = () => {
 
   const handleDelete = async (courierId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/couriers/${courierId}/`);
+      const response = await apiClient.delete(`/couriers/${courierId}/`);
       console.log('Courier deleted successfully:', response.data);
       fetchCouriers(); // Fetch couriers again after deletion
     } catch (error) {
@@ -50,7 +50,7 @@ const CourierComponent = () => {
     try {
       if (editingCourier) {
         // Update existing courier
-        const response = await axios.put(`http://localhost:8000/couriers/${editingCourier.id}/`, editingCourier);
+        const response = await apiClient.put(`/couriers/${editingCourier.id}/`, editingCourier);
         console.log('Courier updated successfully:', response.data);
       } else {
         // Create new courier
@@ -58,9 +58,10 @@ const CourierComponent = () => {
           phone_number: '',
           password: '',
           is_online: false,
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/couriers/', newCourier);
+        const response = await apiClient.post('/couriers/', newCourier);
         console.log('New courier added successfully:', response.data);
       }
 

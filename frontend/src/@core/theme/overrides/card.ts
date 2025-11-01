@@ -1,12 +1,26 @@
 // ** MUI Imports
-import { Theme } from '@mui/material/styles'
+import { Theme, alpha } from '@mui/material/styles'
 
 const Card = (theme: Theme) => {
   return {
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: theme.shadows[6],
+          boxShadow: 'var(--liquid-glass-shadow)',
+          background: 'var(--liquid-glass-surface)',
+          border: `1px solid ${
+            theme.palette.mode === 'light' ? alpha('#ffffff', 0.4) : alpha('#94a3b8', 0.22)
+          }`,
+          backdropFilter: 'var(--liquid-glass-backdrop)',
+          WebkitBackdropFilter: 'var(--liquid-glass-backdrop)',
+          transition: 'box-shadow 0.4s ease, transform 0.4s ease, border-color 0.3s ease',
+          '&:hover': {
+            boxShadow:
+              theme.palette.mode === 'light'
+                ? '0 32px 68px rgba(15, 23, 42, 0.16)'
+                : '0 32px 78px rgba(2, 6, 23, 0.6)',
+            transform: 'translate3d(0, -6px, 0)'
+          },
           '& .card-more-options': {
             marginTop: theme.spacing(-1),
             marginRight: theme.spacing(-3)

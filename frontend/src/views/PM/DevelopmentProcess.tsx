@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/DevelopmentProcess/';
+const API_ENDPOINT = '/DevelopmentProcess/';
 
 const DevelopmentProcessComponent = () => {
   const [developmentProcesses, setDevelopmentProcesses] = useState([]);
@@ -13,7 +13,7 @@ const DevelopmentProcessComponent = () => {
 
   const fetchDevelopmentProcesses = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setDevelopmentProcesses(response.data);
     } catch (error) {
       console.error('Error fetching development processes:', error);
@@ -26,7 +26,7 @@ const DevelopmentProcessComponent = () => {
 
   const handleDelete = async (processId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${processId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${processId}/`);
       fetchDevelopmentProcesses();
     } catch (error) {
       console.error('Error deleting development process:', error);
@@ -36,12 +36,12 @@ const DevelopmentProcessComponent = () => {
   const handleSave = async () => {
     try {
       if (editingProcess) {
-        await axios.put(`${API_ENDPOINT}${editingProcess.id}/`, editingProcess);
+        await apiClient.put(`${API_ENDPOINT}${editingProcess.id}/`, editingProcess);
       } else {
         const newProcess = {
           // Add fields for the new process
         };
-        await axios.post(API_ENDPOINT, newProcess);
+        await apiClient.post(API_ENDPOINT, newProcess);
       }
 
       fetchDevelopmentProcesses();
