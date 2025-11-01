@@ -1,0 +1,65 @@
+{% extends 'backend/main.html' %}
+{% block content %}
+
+{% include 'backend/status.html' %}
+
+<br>
+
+<div class="row">
+    <div class="col-md-5">
+        <h5>CUSTOMERS:</h5>
+        <hr>
+        <div class="card card-body">
+            <a class="card text-center bg-success text-white sm">Customer</a>
+            <table class="table table-sm">
+                <tr>
+                    <th></th>
+                    <th>link</th>
+                    <th>customer type</th>
+                    <th>Phone</th>
+                </tr>
+                {% for customer in custom %}
+                <tr>
+                    <th></th>
+                    <td> <a href="{% url "customer" customer.id %}" > view </a> </td>
+                    <td> {{ customer.customer_type }} </td>
+                    <td> {{ customer.get_username }} </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <h5>LAST 5 ORDERS</h5>
+        <hr>
+        <div class="card card-body">
+            <a class="btn text-center btn-primary text-white bt-sm btn-block" href=''>Create Order</a>
+            <table class="table table-sm">
+                <tr>
+                    <th>Product</th>
+                    <th>Date Ordered</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                    <th>Remove</th>
+                </tr>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        {% for item in order.order_items.all %}
+                            {{ item.product_price.product.name }}
+                            {% if not forloop.last %},
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td> {{ order.date_created }} </td>
+                    <td> {{ order.status }} </td>
+                    <td> <a class="btn btn-info" href="{% url 'update_order' order.id %}">Update</a> </td>
+                    <td> <a class="btn btn-danger" href="{% url 'delete_order' order.id %}">Delete</a> </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'backend/main.html' %}
+{% block content %}
+
+<div class="row">
+	<div class="col">
+		<div class="card card-body text-center">
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ form.management_form }}
+                {% for field in form %}
+                {{ field }}
+                    <hr>
+                {% endfor %}
+                <input type="submit" name="submit">
+
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
