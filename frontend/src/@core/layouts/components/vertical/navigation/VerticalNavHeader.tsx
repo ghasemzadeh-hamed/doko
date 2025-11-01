@@ -32,7 +32,12 @@ const MenuHeaderWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   justifyContent: 'space-between',
   paddingRight: theme.spacing(4.5),
   transition: 'padding .25s ease-in-out',
-  minHeight: theme.mixins.toolbar.minHeight
+  minHeight: theme.mixins.toolbar.minHeight,
+  backdropFilter: 'var(--liquid-glass-backdrop)',
+  WebkitBackdropFilter: 'var(--liquid-glass-backdrop)',
+  borderBottom: `1px solid ${
+    theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 0.28)' : 'rgba(148, 163, 184, 0.22)'
+  }`
 }))
 
 const HeaderTitle = styled(Typography)<TypographyProps>(({ theme }) => ({

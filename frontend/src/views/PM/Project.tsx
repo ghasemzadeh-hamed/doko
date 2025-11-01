@@ -1,6 +1,7 @@
 // Import necessary libraries
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // Define the Project interface
 interface Project {
@@ -36,7 +37,7 @@ const ProjectComponent: React.FC = () => {
    // Function to fetch the list of projects
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Project/');
+      const response = await apiClient.get('/Project/');
       setProjects(response.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -48,9 +49,9 @@ const ProjectComponent: React.FC = () => {
     try {
       // Check if it's an edit or add operation based on the presence of an ID
       if (formData.id) {
-        await axios.put(`http://localhost:8000/Project/${formData.id}/`, formData);
+        await apiClient.put(`/Project/${formData.id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/Project/', formData);
+        await apiClient.post('/Project/', formData);
       }
 
 
@@ -75,7 +76,7 @@ const ProjectComponent: React.FC = () => {
   // Function to handle deleting a project
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:8000/Project/${id}/`);
+      await apiClient.delete(`/Project/${id}/`);
 
       // Fetch the updated list of projects
       fetchProjects();

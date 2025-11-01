@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface AnnualLeaveData {
@@ -15,7 +16,7 @@ const AnnualLeaveComponent: React.FC = () => {
   const [annualLeaves, setAnnualLeaves] = useState<AnnualLeaveData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/AnnualLeave/') // تغییر URL بر اساس مسیر API شما
+    apiClient.get('/AnnualLeave/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setAnnualLeaves(response.data);
       })

@@ -1,7 +1,6 @@
-
 // components/AddWarehouse.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AddWarehouse: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -35,8 +34,9 @@ const AddWarehouse: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/Warehouse/', formData);
+      const response = await apiClient.post('/Warehouse/', formData);
       console.log('Warehouse added successfully:', response.data);
+
       // You can perform additional actions after adding the warehouse
     } catch (error) {
       console.error('Error adding warehouse:', error);

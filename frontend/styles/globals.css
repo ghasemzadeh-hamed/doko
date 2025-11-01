@@ -1,10 +1,86 @@
+:root {
+  --liquid-glass-base: #0f172a;
+  --liquid-glass-base-alt: #111c36;
+  --liquid-glass-primary: rgba(124, 58, 237, 0.45);
+  --liquid-glass-secondary: rgba(14, 165, 233, 0.45);
+  --liquid-glass-tertiary: rgba(34, 211, 238, 0.35);
+  --liquid-glass-sheen: rgba(255, 255, 255, 0.3);
+  --liquid-glass-surface: rgba(15, 23, 42, 0.75);
+  --liquid-glass-border: rgba(148, 163, 184, 0.2);
+  --liquid-glass-shadow: 0 22px 65px rgba(2, 6, 23, 0.65);
+  --liquid-glass-backdrop: blur(26px);
+}
+
 html,
 body {
   min-height: 100%;
 }
 
+body {
+  margin: 0;
+  position: relative;
+  background-attachment: fixed;
+  background-image: radial-gradient(circle at 12% 18%, var(--liquid-glass-primary), transparent 58%),
+    radial-gradient(circle at 88% 10%, var(--liquid-glass-secondary), transparent 55%),
+    radial-gradient(circle at 12% 88%, var(--liquid-glass-tertiary), transparent 60%),
+    linear-gradient(135deg, var(--liquid-glass-base), var(--liquid-glass-base-alt));
+  color: inherit;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  top: -15%;
+  left: -10%;
+  width: 140%;
+  height: 140%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 50%, var(--liquid-glass-sheen), transparent 65%);
+  animation: glassDrift 24s ease-in-out infinite;
+  opacity: 0.45;
+  mix-blend-mode: screen;
+}
+
+body::after {
+  animation-duration: 32s;
+  animation-direction: reverse;
+  filter: blur(30px);
+  opacity: 0.35;
+}
+
 #__next {
-  height: 100%;
+  min-height: 100%;
+  position: relative;
+  z-index: 0;
+}
+
+.glass-surface {
+  background: var(--liquid-glass-surface);
+  border: 1px solid var(--liquid-glass-border);
+  box-shadow: var(--liquid-glass-shadow);
+  backdrop-filter: var(--liquid-glass-backdrop);
+  -webkit-backdrop-filter: var(--liquid-glass-backdrop);
+  transition: box-shadow 0.45s ease, transform 0.45s ease, background 0.45s ease;
+}
+
+.glass-surface--interactive:hover {
+  transform: translate3d(0, -4px, 0);
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.25);
+}
+
+@keyframes glassDrift {
+  0% {
+    transform: translate3d(-2%, -3%, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-2%, -3%, 0) rotate(0deg);
+  }
 }
 
 code {
@@ -15,10 +91,12 @@ code {
   color: #d400ff;
   border-radius: 0.1335rem;
 }
+
 code:not([class*='language-']):before,
 code:not([class*='language-']):after {
   content: '`';
 }
+
 code[class*='language-'] {
   padding: 0;
 }

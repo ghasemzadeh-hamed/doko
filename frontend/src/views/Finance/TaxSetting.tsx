@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/TaxSetting/';
+const API_ENDPOINT = '/TaxSetting/';
 
 const TaxSettingComponent = () => {
   const [taxSettings, setTaxSettings] = useState([]);
@@ -17,7 +17,7 @@ const TaxSettingComponent = () => {
 
   const fetchTaxSettings = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setTaxSettings(response.data);
     } catch (error) {
       console.error('Error fetching tax settings:', error);
@@ -26,7 +26,7 @@ const TaxSettingComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newTaxSetting);
+      await apiClient.post(API_ENDPOINT, newTaxSetting);
       fetchTaxSettings();
       setNewTaxSetting({
         tax_name: '',
@@ -43,7 +43,7 @@ const TaxSettingComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingTaxSetting.id}/`, editingTaxSetting);
+      await apiClient.put(`${API_ENDPOINT}${editingTaxSetting.id}/`, editingTaxSetting);
       fetchTaxSettings();
       setEditingTaxSetting(null);
     } catch (error) {
@@ -53,7 +53,7 @@ const TaxSettingComponent = () => {
 
   const handleDelete = async (taxSettingId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${taxSettingId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${taxSettingId}/`);
       fetchTaxSettings();
     } catch (error) {
       console.error('Error deleting tax setting:', error);

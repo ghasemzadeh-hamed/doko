@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/RiskManagement/';
+const API_ENDPOINT = '/RiskManagement/';
 
 const RiskManagementComponent = () => {
   const [riskItems, setRiskItems] = useState([]);
@@ -13,7 +13,7 @@ const RiskManagementComponent = () => {
 
   const fetchRiskItems = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setRiskItems(response.data);
     } catch (error) {
       console.error('Error fetching risk items:', error);
@@ -26,7 +26,7 @@ const RiskManagementComponent = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${itemId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${itemId}/`);
       fetchRiskItems();
     } catch (error) {
       console.error('Error deleting risk item:', error);
@@ -36,12 +36,12 @@ const RiskManagementComponent = () => {
   const handleSave = async () => {
     try {
       if (editingItem) {
-        await axios.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
+        await apiClient.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
       } else {
         const newItem = {
           // Add other fields as needed
         };
-        await axios.post(API_ENDPOINT, newItem);
+        await apiClient.post(API_ENDPOINT, newItem);
       }
 
       fetchRiskItems();

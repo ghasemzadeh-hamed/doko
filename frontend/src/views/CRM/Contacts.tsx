@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ContactsComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const ContactsComponent = () => {
 
   const fetchContacts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Contacts/');
+      const response = await apiClient.get('/Contacts/');
       setContacts(response.data);
     } catch (error) {
       console.error('Error fetching contacts:', error);
@@ -43,7 +43,7 @@ const ContactsComponent = () => {
 
   const handleDelete = async (contactId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Contacts/${contactId}/`);
+      const response = await apiClient.delete(`/Contacts/${contactId}/`);
       console.log('Contact deleted successfully:', response.data);
       fetchContacts(); // Fetch contacts again after deletion
     } catch (error) {
@@ -55,7 +55,7 @@ const ContactsComponent = () => {
     try {
       if (editingContact) {
         // Update existing contact
-        const response = await axios.put(`http://localhost:8000/Contacts/${editingContact.id}/`, editingContact);
+        const response = await apiClient.put(`/Contacts/${editingContact.id}/`, editingContact);
         console.log('Contact updated successfully:', response.data);
       } else {
         // Create new contact
@@ -75,7 +75,7 @@ const ContactsComponent = () => {
           financial_keys: [],
           teams: [],
         };
-        const response = await axios.post('http://localhost:8000/Contacts/', newContact);
+        const response = await apiClient.post('/Contacts/', newContact);
         console.log('New contact added successfully:', response.data);
       }
 

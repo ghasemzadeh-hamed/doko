@@ -1,4 +1,5 @@
 "use client"
+
 // ** React Imports
 import { useState, useEffect, ChangeEvent, SyntheticEvent } from 'react';
 
@@ -16,7 +17,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ActivityComponent = () => {
   // ** State
@@ -31,7 +32,7 @@ const ActivityComponent = () => {
 
   const fetchActivities = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Activity/');
+      const response = await apiClient.get('/Activity/');
       setActivities(response.data);
     } catch (error) {
       console.error('Error fetching activities:', error);
@@ -44,7 +45,7 @@ const ActivityComponent = () => {
 
   const handleDelete = async (activityId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Activity/${activityId}/`);
+      const response = await apiClient.delete(`/Activity/${activityId}/`);
       console.log('Activity deleted successfully:', response.data);
       fetchActivities(); // Fetch activities again after deletion
     } catch (error) {
@@ -56,7 +57,7 @@ const ActivityComponent = () => {
     try {
       if (editingActivity) {
         // Update existing activity
-        const response = await axios.put(`http://localhost:8000/Activity/${editingActivity.id}/`, editingActivity);
+        const response = await apiClient.put(`/Activity/${editingActivity.id}/`, editingActivity);
         console.log('Activity updated successfully:', response.data);
       } else {
         // Create new activity
@@ -64,7 +65,7 @@ const ActivityComponent = () => {
           description: '',
           user: null,
         };
-        const response = await axios.post('http://localhost:8000/Activity/', newActivity);
+        const response = await apiClient.post('/Activity/', newActivity);
         console.log('New activity added successfully:', response.data);
       }
 

@@ -1,7 +1,6 @@
-
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 interface BaseStaffRequestData {
@@ -10,6 +9,7 @@ interface BaseStaffRequestData {
   end: string;
   review_reason: string;
   review_status: string;
+
   // اضافه کردن سایر فیلدهای مورد نیاز
 }
 
@@ -17,7 +17,8 @@ const BaseStaffRequestComponent: React.FC = () => {
   const [requests, setRequests] = useState<BaseStaffRequestData[]>([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/BaseStaffRequest/\n') // تغییر URL بر اساس مسیر API شما
+    apiClient
+      .get('/BaseStaffRequest/') // تغییر URL بر اساس مسیر API شما
       .then(response => {
         setRequests(response.data);
       })

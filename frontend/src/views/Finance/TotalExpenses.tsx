@@ -11,9 +11,9 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/TotalExpenses/';
+const API_ENDPOINT = '/TotalExpenses/';
 
 const TotalExpensesComponent = () => {
   // ** State
@@ -27,7 +27,7 @@ const TotalExpensesComponent = () => {
 
   const fetchTotalExpensesList = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setTotalExpensesList(response.data);
     } catch (error) {
       console.error('Error fetching total expenses:', error);
@@ -40,7 +40,7 @@ const TotalExpensesComponent = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${itemId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${itemId}/`);
       console.log('Total expenses item deleted successfully');
       fetchTotalExpensesList(); // Fetch items again after deletion
     } catch (error) {
@@ -52,7 +52,7 @@ const TotalExpensesComponent = () => {
     try {
       if (editingItem) {
         // Update existing item
-        await axios.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
+        await apiClient.put(`${API_ENDPOINT}${editingItem.id}/`, editingItem);
         console.log('Total expenses item updated successfully');
       } else {
         // Create new item
@@ -61,7 +61,7 @@ const TotalExpensesComponent = () => {
           user: 1, // Replace with the actual user ID
           expenses: 0,
         };
-        await axios.post(API_ENDPOINT, newItem);
+        await apiClient.post(API_ENDPOINT, newItem);
         console.log('New total expenses item added successfully');
       }
 

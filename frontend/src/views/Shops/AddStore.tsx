@@ -1,7 +1,6 @@
-
 // components/AddStore.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AddStore: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -31,8 +30,9 @@ const AddStore: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/Store/', formData);
+      const response = await apiClient.post('/Store/', formData);
       console.log('Store added successfully:', response.data);
+
       // You can perform additional actions after adding the Store
     } catch (error) {
       console.error('Error adding Store:', error);

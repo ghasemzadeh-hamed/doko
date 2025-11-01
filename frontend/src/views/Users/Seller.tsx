@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const SellerComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const SellerComponent = () => {
 
   const fetchSellers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/sellers/');
+      const response = await apiClient.get('/sellers/');
       setSellers(response.data);
     } catch (error) {
       console.error('Error fetching sellers:', error);
@@ -38,7 +38,7 @@ const SellerComponent = () => {
 
   const handleDelete = async (sellerId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/sellers/${sellerId}/`);
+      const response = await apiClient.delete(`/sellers/${sellerId}/`);
       console.log('Seller deleted successfully:', response.data);
       fetchSellers(); // Fetch sellers again after deletion
     } catch (error) {
@@ -50,15 +50,16 @@ const SellerComponent = () => {
     try {
       if (editingSeller) {
         // Update existing seller
-        const response = await axios.put(`http://localhost:8000/sellers/${editingSeller.id}/`, editingSeller);
+        const response = await apiClient.put(`/sellers/${editingSeller.id}/`, editingSeller);
         console.log('Seller updated successfully:', response.data);
       } else {
         // Create new seller
         const newSeller = {
           phone_number: '',
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/sellers/', newSeller);
+        const response = await apiClient.post('/sellers/', newSeller);
         console.log('New seller added successfully:', response.data);
       }
 

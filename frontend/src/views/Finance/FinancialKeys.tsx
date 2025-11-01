@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/FinancialKeys/';
+const API_ENDPOINT = '/FinancialKeys/';
 
 const FinancialKeysComponent = () => {
   const [financialKeys, setFinancialKeys] = useState([]);
@@ -18,7 +18,7 @@ const FinancialKeysComponent = () => {
 
   const fetchFinancialKeys = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setFinancialKeys(response.data);
     } catch (error) {
       console.error('Error fetching financial keys:', error);
@@ -27,7 +27,7 @@ const FinancialKeysComponent = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post(API_ENDPOINT, newFinancialKey);
+      await apiClient.post(API_ENDPOINT, newFinancialKey);
       fetchFinancialKeys();
       setNewFinancialKey({
         user: '',
@@ -45,7 +45,7 @@ const FinancialKeysComponent = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`${API_ENDPOINT}${editingFinancialKey.id}/`, editingFinancialKey);
+      await apiClient.put(`${API_ENDPOINT}${editingFinancialKey.id}/`, editingFinancialKey);
       fetchFinancialKeys();
       setEditingFinancialKey(null);
     } catch (error) {
@@ -55,7 +55,7 @@ const FinancialKeysComponent = () => {
 
   const handleDelete = async (financialKeyId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${financialKeyId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${financialKeyId}/`);
       fetchFinancialKeys();
     } catch (error) {
       console.error('Error deleting financial key:', error);

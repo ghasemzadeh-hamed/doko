@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const UsersComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const UsersComponent = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/customusers/');
+      const response = await apiClient.get('/customusers/');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -38,7 +38,7 @@ const UsersComponent = () => {
 
   const handleDelete = async (userId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/customusers/${userId}/`);
+      const response = await apiClient.delete(`/customusers/${userId}/`);
       console.log('User deleted successfully:', response.data);
       fetchUsers(); // Fetch users again after deletion
     } catch (error) {
@@ -50,7 +50,7 @@ const UsersComponent = () => {
     try {
       if (editingUser) {
         // Update existing user
-        const response = await axios.put(`http://localhost:8000/customusers/${editingUser.id}/`, editingUser);
+        const response = await apiClient.put(`/customusers/${editingUser.id}/`, editingUser);
         console.log('User updated successfully:', response.data);
       } else {
         // Create new user
@@ -60,9 +60,10 @@ const UsersComponent = () => {
           is_active: false,
           is_staff: false,
           role: null,
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/customusers/', newUser);
+        const response = await apiClient.post('/customusers/', newUser);
         console.log('New user added successfully:', response.data);
       }
 

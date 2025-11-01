@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const TeamsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const TeamsComponent = () => {
 
   const fetchTeams = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Teams/');
+      const response = await apiClient.get('/Teams/');
       setTeams(response.data);
     } catch (error) {
       console.error('Error fetching teams:', error);
@@ -38,7 +38,7 @@ const TeamsComponent = () => {
 
   const handleDelete = async (teamId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Teams/${teamId}/`);
+      const response = await apiClient.delete(`/Teams/${teamId}/`);
       console.log('Team deleted successfully:', response.data);
       fetchTeams(); // Fetch teams again after deletion
     } catch (error) {
@@ -50,7 +50,7 @@ const TeamsComponent = () => {
     try {
       if (editingTeam) {
         // Update existing team
-        const response = await axios.put(`http://localhost:8000/Teams/${editingTeam.id}/`, editingTeam);
+        const response = await apiClient.put(`/Teams/${editingTeam.id}/`, editingTeam);
         console.log('Team updated successfully:', response.data);
       } else {
         // Create new team
@@ -59,7 +59,7 @@ const TeamsComponent = () => {
           description: '',
           teams: [],
         };
-        const response = await axios.post('http://localhost:8000/Teams/', newTeam);
+        const response = await apiClient.post('/Teams/', newTeam);
         console.log('New team added successfully:', response.data);
       }
 

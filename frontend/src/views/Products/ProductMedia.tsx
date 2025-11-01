@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ProductMediaComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ProductMediaComponent = () => {
 
   const fetchProductMedia = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/ProductMedia/');
+      const response = await apiClient.get('/ProductMedia/');
       setProductMedia(response.data);
     } catch (error) {
       console.error('Error fetching product media:', error);
@@ -38,7 +38,7 @@ const ProductMediaComponent = () => {
 
   const handleDelete = async (mediaId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/ProductMedia/${mediaId}/`);
+      const response = await apiClient.delete(`/ProductMedia/${mediaId}/`);
       console.log('Product media deleted successfully:', response.data);
       fetchProductMedia(); // Fetch product media again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ProductMediaComponent = () => {
     try {
       if (editingProductMedia) {
         // Update existing product media
-        const response = await axios.put(`http://localhost:8000/ProductMedia/${editingProductMedia.id}/`, editingProductMedia);
+        const response = await apiClient.put(`/ProductMedia/${editingProductMedia.id}/`, editingProductMedia);
         console.log('Product media updated successfully:', response.data);
       } else {
         // Create new product media
         const newProductMedia = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/ProductMedia/', newProductMedia);
+        const response = await apiClient.post('/ProductMedia/', newProductMedia);
         console.log('New product media added successfully:', response.data);
       }
 

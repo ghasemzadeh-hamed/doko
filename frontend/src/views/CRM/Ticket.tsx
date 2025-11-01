@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const TicketComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const TicketComponent = () => {
 
   const fetchTickets = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Ticket/');
+      const response = await apiClient.get('/Ticket/');
       setTickets(response.data);
     } catch (error) {
       console.error('Error fetching tickets:', error);
@@ -43,7 +43,7 @@ const TicketComponent = () => {
 
   const handleDelete = async (ticketId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Ticket/${ticketId}/`);
+      const response = await apiClient.delete(`/Ticket/${ticketId}/`);
       console.log('Ticket deleted successfully:', response.data);
       fetchTickets(); // Fetch tickets again after deletion
     } catch (error) {
@@ -55,7 +55,7 @@ const TicketComponent = () => {
     try {
       if (editingTicket) {
         // Update existing ticket
-        const response = await axios.put(`http://localhost:8000/Ticket/${editingTicket.id}/`, editingTicket);
+        const response = await apiClient.put(`/Ticket/${editingTicket.id}/`, editingTicket);
         console.log('Ticket updated successfully:', response.data);
       } else {
         // Create new ticket
@@ -66,7 +66,7 @@ const TicketComponent = () => {
           priority: null,
           user: null,
         };
-        const response = await axios.post('http://localhost:8000/Ticket/', newTicket);
+        const response = await apiClient.post('/Ticket/', newTicket);
         console.log('New ticket added successfully:', response.data);
       }
 

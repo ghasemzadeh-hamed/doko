@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface Address {
   id: number;
@@ -18,7 +19,7 @@ const AddressList: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
 
   useEffect(() => {
-    axios.get<Address[]>('http://localhost:8000/addresses/')
+    apiClient.get<Address[]>('/addresses/')
       .then(response => {
         setAddresses(response.data);
       })

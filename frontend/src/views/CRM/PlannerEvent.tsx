@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const PlannerEventComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const PlannerEventComponent = () => {
 
   const fetchPlannerEvents = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/PlannerEvent/');
+      const response = await apiClient.get('/PlannerEvent/');
       setPlannerEvents(response.data);
     } catch (error) {
       console.error('Error fetching planner events:', error);
@@ -38,7 +38,7 @@ const PlannerEventComponent = () => {
 
   const handleDelete = async (plannerEventId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/PlannerEvent/${plannerEventId}/`);
+      const response = await apiClient.delete(`/PlannerEvent/${plannerEventId}/`);
       console.log('PlannerEvent deleted successfully:', response.data);
       fetchPlannerEvents(); // Fetch planner events again after deletion
     } catch (error) {
@@ -50,15 +50,16 @@ const PlannerEventComponent = () => {
     try {
       if (editingPlannerEvent) {
         // Update existing planner event
-        const response = await axios.put(`http://localhost:8000/PlannerEvent/${editingPlannerEvent.id}/`, editingPlannerEvent);
+        const response = await apiClient.put(`/PlannerEvent/${editingPlannerEvent.id}/`, editingPlannerEvent);
         console.log('PlannerEvent updated successfully:', response.data);
       } else {
         // Create new planner event
         const newPlannerEvent = {
           name: '',
+
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/PlannerEvent/', newPlannerEvent);
+        const response = await apiClient.post('/PlannerEvent/', newPlannerEvent);
         console.log('New planner event added successfully:', response.data);
       }
 

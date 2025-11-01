@@ -1,6 +1,7 @@
 // components/EditServiceProvider.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditStoreProps {
   StorerId: number;
@@ -22,7 +23,7 @@ const EditStore: React.FC<EditStoreProps> = ({ storeId }) => {
   });
 
   useEffect(() => {
-    axios.get<Store>(`http://localhost:8000/Store/${storeId}/`)
+    apiClient.get<Store>(`/Store/${storeId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -49,8 +50,9 @@ const EditStore: React.FC<EditStoreProps> = ({ storeId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/Store/${storeId}/`, formData);
+      const response = await apiClient.put(`/Store/${storeId}/`, formData);
       console.log('Store updated successfully:', response.data);
+
       // You can perform additional actions after updating the store
     } catch (error) {
       console.error('Error updating store:', error);

@@ -1,6 +1,7 @@
 // components/ServiceProviderList.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface ServiceProvider {
   id: number;
@@ -10,18 +11,22 @@ interface ServiceProvider {
     id: number;
     latitude: number | null;
     longitude: number | null;
+
     // Add other fields from your Address model as needed
   };
   managers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   cashiers: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
   apprentice: {
     id: number;
+
     // Add other fields from your Seller model as needed
   }[];
 }
@@ -30,7 +35,7 @@ const ServiceProviderList: React.FC = () => {
   const [serviceProviders, setServiceProviders] = useState<ServiceProvider[]>([]);
 
   useEffect(() => {
-    axios.get<ServiceProvider[]>('http://localhost:8000/ServiceProvider/')
+    apiClient.get<ServiceProvider[]>('/ServiceProvider/')
       .then(response => {
         setServiceProviders(response.data);
       })

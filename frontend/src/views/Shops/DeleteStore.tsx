@@ -1,7 +1,7 @@
-
 // components/DeleteStore.tsx
 import React from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface DeleteStoreProps {
   StorerId: number;
@@ -10,8 +10,9 @@ interface DeleteStoreProps {
 const DeleteStore: React.FC<DeleteStoreProps> = ({ StoreId }) => {
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Store/${StoreId}/`);
+      const response = await apiClient.delete(`/Store/${StoreId}/`);
       console.log('Store deleted successfully:', response.data);
+
       // You can perform additional actions after deleting the Store
     } catch (error) {
       console.error('Error deleting Store:', error);

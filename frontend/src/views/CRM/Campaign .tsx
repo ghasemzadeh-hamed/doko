@@ -15,7 +15,7 @@ import Close from 'mdi-material-ui/Close';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const CampaignComponent = () => {
   // ** State
@@ -30,7 +30,7 @@ const CampaignComponent = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Campaign/');
+      const response = await apiClient.get('/Campaign/');
       setCampaigns(response.data);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
@@ -43,7 +43,7 @@ const CampaignComponent = () => {
 
   const handleDelete = async (campaignId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Campaign/${campaignId}/`);
+      const response = await apiClient.delete(`/Campaign/${campaignId}/`);
       console.log('Campaign deleted successfully:', response.data);
       fetchCampaigns(); // Fetch campaigns again after deletion
     } catch (error) {
@@ -55,12 +55,12 @@ const CampaignComponent = () => {
     try {
       if (editingCampaign) {
         // Update existing campaign
-        const response = await axios.put(`http://localhost:8000/Campaign/${editingCampaign.id}/`, editingCampaign);
+        const response = await apiClient.put(`/Campaign/${editingCampaign.id}/`, editingCampaign);
         console.log('Campaign updated successfully:', response.data);
       } else {
         // Create new campaign
         const newCampaign = { name: '', start_date: null, end_date: null, description: '' };
-        const response = await axios.post('http://localhost:8000/Campaign/', newCampaign);
+        const response = await apiClient.post('/Campaign/', newCampaign);
         console.log('New campaign added successfully:', response.data);
       }
 

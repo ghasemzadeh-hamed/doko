@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
-import axios from 'axios'
+import apiClient from 'src/services/apiClient';
 import TableCollapsible from 'src/views/tables/TableCollapsible'
 
 
@@ -15,7 +15,7 @@ const UserLoginLogComponent: React.FC = () => {
   const [logs, setLogs] = useState<UserLoginLog[]>([])
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/UserLoginLog/')
+    apiClient.get('/UserLoginLog/')
       .then(response => {
         setLogs(response.data)
       })

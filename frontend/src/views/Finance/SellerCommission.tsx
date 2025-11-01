@@ -1,6 +1,7 @@
 // ** React Imports
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 // ** MUI Imports
 import Box from '@mui/material/Box';
@@ -11,7 +12,7 @@ import Button from '@mui/material/Button';
 import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
-const API_ENDPOINT = 'http://localhost:8000/SellerCommission/';
+const API_ENDPOINT = '/SellerCommission/';
 
 const SellerCommissionComponent = () => {
   const [sellerCommissions, setSellerCommissions] = useState([]);
@@ -23,7 +24,7 @@ const SellerCommissionComponent = () => {
 
   const fetchSellerCommissions = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setSellerCommissions(response.data);
     } catch (error) {
       console.error('Error fetching seller commissions:', error);
@@ -36,7 +37,7 @@ const SellerCommissionComponent = () => {
 
   const handleDelete = async (commissionId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${commissionId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${commissionId}/`);
       console.log('Seller commission deleted successfully:', response.data);
       fetchSellerCommissions(); // Fetch items again after deletion
     } catch (error) {
@@ -48,14 +49,14 @@ const SellerCommissionComponent = () => {
     try {
       if (editingCommission) {
         // Update existing commission
-        const response = await axios.put(`${API_ENDPOINT}${editingCommission.id}/`, editingCommission);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingCommission.id}/`, editingCommission);
         console.log('Seller commission updated successfully:', response.data);
       } else {
         // Create new commission
         const newCommission = {
           // Add other fields as needed
         };
-        const response = await axios.post(API_ENDPOINT, newCommission);
+        const response = await apiClient.post(API_ENDPOINT, newCommission);
         console.log('New seller commission added successfully:', response.data);
       }
 

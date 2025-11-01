@@ -4,23 +4,23 @@ import { ThemeColor } from 'src/@core/layouts/types'
 
 const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
   // ** Vars
-  const lightColor = '58, 53, 65'
-  const darkColor = '231, 227, 252'
+  const lightColor = '24, 31, 56'
+  const darkColor = '240, 244, 255'
   const mainColor = mode === 'light' ? lightColor : darkColor
 
   const primaryGradient = () => {
     if (themeColor === 'primary') {
-      return '#C6A7FE'
+      return '#a78bfa'
     } else if (themeColor === 'secondary') {
-      return '#9C9FA4'
+      return '#67e8f9'
     } else if (themeColor === 'success') {
-      return '#93DD5C'
+      return '#4ade80'
     } else if (themeColor === 'error') {
-      return '#FF8C90'
+      return '#fb7185'
     } else if (themeColor === 'warning') {
-      return '#FFCF5C'
+      return '#facc15'
     } else {
-      return '#6ACDFF'
+      return '#60a5fa'
     }
   }
 
@@ -36,39 +36,39 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     },
     mode: mode,
     primary: {
-      light: '#9E69FD',
-      main: '#9155FD',
-      dark: '#804BDF',
+      light: '#a78bfa',
+      main: '#7c3aed',
+      dark: '#5b21b6',
       contrastText: '#FFF'
     },
     secondary: {
-      light: '#9C9FA4',
-      main: '#8A8D93',
-      dark: '#777B82',
-      contrastText: '#FFF'
+      light: '#67e8f9',
+      main: '#22d3ee',
+      dark: '#0ea5e9',
+      contrastText: mode === 'light' ? '#042f2e' : '#ecfeff'
     },
     success: {
-      light: '#6AD01F',
-      main: '#56CA00',
-      dark: '#4CB200',
+      light: '#86efac',
+      main: '#22c55e',
+      dark: '#15803d',
       contrastText: '#FFF'
     },
     error: {
-      light: '#FF6166',
-      main: '#FF4C51',
-      dark: '#E04347',
+      light: '#fca5a5',
+      main: '#f43f5e',
+      dark: '#be123c',
       contrastText: '#FFF'
     },
     warning: {
-      light: '#FFCA64',
-      main: '#FFB400',
-      dark: '#E09E00',
-      contrastText: '#FFF'
+      light: '#fde68a',
+      main: '#f59e0b',
+      dark: '#b45309',
+      contrastText: mode === 'light' ? '#2f1900' : '#fff7ed'
     },
     info: {
-      light: '#32BAFF',
-      main: '#16B1FF',
-      dark: '#139CE0',
+      light: '#60a5fa',
+      main: '#3b82f6',
+      dark: '#1d4ed8',
       contrastText: '#FFF'
     },
     grey: {
@@ -94,8 +94,8 @@ const DefaultPalette = (mode: PaletteMode, themeColor: ThemeColor) => {
     },
     divider: `rgba(${mainColor}, 0.12)`,
     background: {
-      paper: mode === 'light' ? '#FFF' : '#312D4B',
-      default: mode === 'light' ? '#F4F5FA' : '#28243D'
+      paper: mode === 'light' ? '#f7f9ff' : '#13172b',
+      default: mode === 'light' ? '#eef2ff' : '#070b1a'
     },
     action: {
       active: `rgba(${mainColor}, 0.54)`,

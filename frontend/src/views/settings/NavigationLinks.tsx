@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const NavigationLinksComponent = () => {
   // ** State
@@ -28,7 +28,7 @@ const NavigationLinksComponent = () => {
 
   const fetchNavigationLinks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/NavigationLink/');
+      const response = await apiClient.get('/NavigationLink/');
       setNavigationLinks(response.data);
     } catch (error) {
       console.error('Error fetching navigation links:', error);
@@ -37,7 +37,7 @@ const NavigationLinksComponent = () => {
 
   const fetchSublinks = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Sublink/');
+      const response = await apiClient.get('/Sublink/');
       setSublinks(response.data);
     } catch (error) {
       console.error('Error fetching sublinks:', error);
@@ -50,7 +50,7 @@ const NavigationLinksComponent = () => {
 
   const handleNavigationLinkDelete = async (navigationLinkId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/NavigationLink/${navigationLinkId}/`);
+      const response = await apiClient.delete(`/NavigationLink/${navigationLinkId}/`);
       console.log('NavigationLink deleted successfully:', response.data);
       fetchNavigationLinks(); // Fetch navigation links again after deletion
     } catch (error) {
@@ -64,7 +64,7 @@ const NavigationLinksComponent = () => {
 
   const handleSublinkDelete = async (sublinkId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Sublink/${sublinkId}/`);
+      const response = await apiClient.delete(`/Sublink/${sublinkId}/`);
       console.log('Sublink deleted successfully:', response.data);
       fetchSublinks(); // Fetch sublinks again after deletion
     } catch (error) {
@@ -76,7 +76,7 @@ const NavigationLinksComponent = () => {
     try {
       if (editingNavigationLink) {
         // Update existing navigation link
-        const response = await axios.put(`http://localhost:8000/NavigationLink/${editingNavigationLink.id}/`, editingNavigationLink);
+        const response = await apiClient.put(`/NavigationLink/${editingNavigationLink.id}/`, editingNavigationLink);
         console.log('NavigationLink updated successfully:', response.data);
       } else {
         // Create new navigation link
@@ -84,7 +84,7 @@ const NavigationLinksComponent = () => {
           title: '',
           url: '',
         };
-        const response = await axios.post('http://localhost:8000/NavigationLink/', newNavigationLink);
+        const response = await apiClient.post('/NavigationLink/', newNavigationLink);
         console.log('New navigation link added successfully:', response.data);
       }
 
@@ -99,7 +99,7 @@ const NavigationLinksComponent = () => {
     try {
       if (editingSublink) {
         // Update existing sublink
-        const response = await axios.put(`http://localhost:8000/Sublink/${editingSublink.id}/`, editingSublink);
+        const response = await apiClient.put(`/Sublink/${editingSublink.id}/`, editingSublink);
         console.log('Sublink updated successfully:', response.data);
       } else {
         // Create new sublink
@@ -108,7 +108,7 @@ const NavigationLinksComponent = () => {
           url: '',
           navigationlink: null,
         };
-        const response = await axios.post('http://localhost:8000/Sublink/', newSublink);
+        const response = await apiClient.post('/Sublink/', newSublink);
         console.log('New sublink added successfully:', response.data);
       }
 

@@ -1,7 +1,7 @@
-
 // components/EditOffice.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface EditOfficeProps {
   officeId: number;
@@ -23,7 +23,7 @@ const EditOffice: React.FC<EditOfficeProps> = ({ officeId }) => {
   });
 
   useEffect(() => {
-    axios.get<Office>(`http://localhost:8000/Office/${officeId}/`)
+    apiClient.get<Office>(`/Office/${officeId}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -50,8 +50,9 @@ const EditOffice: React.FC<EditOfficeProps> = ({ officeId }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.put(`http://localhost:8000/Office/${officeId}/`, formData);
+      const response = await apiClient.put(`/Office/${officeId}/`, formData);
       console.log('Office updated successfully:', response.data);
+
       // You can perform additional actions after updating the office
     } catch (error) {
       console.error('Error updating office:', error);

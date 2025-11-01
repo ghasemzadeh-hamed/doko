@@ -11,9 +11,9 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/CourierExpense/';
+const API_ENDPOINT = '/CourierExpense/';
 
 const CourierExpenseComponent = () => {
   // ** State
@@ -27,7 +27,7 @@ const CourierExpenseComponent = () => {
 
   const fetchCourierExpenses = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setExpenses(response.data);
     } catch (error) {
       console.error('Error fetching courier expenses:', error);
@@ -40,7 +40,7 @@ const CourierExpenseComponent = () => {
 
   const handleDelete = async (expenseId) => {
     try {
-      const response = await axios.delete(`${API_ENDPOINT}${expenseId}/`);
+      const response = await apiClient.delete(`${API_ENDPOINT}${expenseId}/`);
       console.log('Courier expense deleted successfully:', response.data);
       fetchCourierExpenses(); // Fetch expenses again after deletion
     } catch (error) {
@@ -52,14 +52,14 @@ const CourierExpenseComponent = () => {
     try {
       if (editingExpense) {
         // Update existing expense
-        const response = await axios.put(`${API_ENDPOINT}${editingExpense.id}/`, editingExpense);
+        const response = await apiClient.put(`${API_ENDPOINT}${editingExpense.id}/`, editingExpense);
         console.log('Courier expense updated successfully:', response.data);
       } else {
         // Create new expense
         const newExpense = {
           // Add other fields as needed
         };
-        const response = await axios.post(API_ENDPOINT, newExpense);
+        const response = await apiClient.post(API_ENDPOINT, newExpense);
         console.log('New courier expense added successfully:', response.data);
       }
 

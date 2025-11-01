@@ -11,9 +11,9 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** Axios Import
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
-const API_ENDPOINT = 'http://localhost:8000/MarketAnalysis/';
+const API_ENDPOINT = '/MarketAnalysis/';
 
 const MarketAnalysisComponent = () => {
   // ** State
@@ -27,7 +27,7 @@ const MarketAnalysisComponent = () => {
 
   const fetchMarketAnalyses = async () => {
     try {
-      const response = await axios.get(API_ENDPOINT);
+      const response = await apiClient.get(API_ENDPOINT);
       setMarketAnalyses(response.data);
     } catch (error) {
       console.error('Error fetching market analyses:', error);
@@ -40,7 +40,7 @@ const MarketAnalysisComponent = () => {
 
   const handleDelete = async (marketAnalysisId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}${marketAnalysisId}/`);
+      await apiClient.delete(`${API_ENDPOINT}${marketAnalysisId}/`);
       console.log('Market analysis deleted successfully');
       fetchMarketAnalyses(); // Fetch market analyses again after deletion
     } catch (error) {
@@ -52,14 +52,14 @@ const MarketAnalysisComponent = () => {
     try {
       if (editingMarketAnalysis) {
         // Update existing market analysis
-        await axios.put(`${API_ENDPOINT}${editingMarketAnalysis.id}/`, editingMarketAnalysis);
+        await apiClient.put(`${API_ENDPOINT}${editingMarketAnalysis.id}/`, editingMarketAnalysis);
         console.log('Market analysis updated successfully');
       } else {
         // Create new market analysis
         const newMarketAnalysis = {
           // Add other fields as needed
         };
-        await axios.post(API_ENDPOINT, newMarketAnalysis);
+        await apiClient.post(API_ENDPOINT, newMarketAnalysis);
         console.log('New market analysis added successfully');
       }
 

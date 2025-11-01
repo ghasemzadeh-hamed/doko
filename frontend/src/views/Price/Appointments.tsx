@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const AppointmentsComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const AppointmentsComponent = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Appointments/');
+      const response = await apiClient.get('/Appointments/');
       setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -38,7 +38,7 @@ const AppointmentsComponent = () => {
 
   const handleDelete = async (appointmentId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Appointments/${appointmentId}/`);
+      const response = await apiClient.delete(`/Appointments/${appointmentId}/`);
       console.log('Appointment deleted successfully:', response.data);
       fetchAppointments(); // Fetch appointments again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const AppointmentsComponent = () => {
     try {
       if (editingAppointment) {
         // Update existing appointment
-        const response = await axios.put(`http://localhost:8000/Appointments/${editingAppointment.id}/`, editingAppointment);
+        const response = await apiClient.put(`/Appointments/${editingAppointment.id}/`, editingAppointment);
         console.log('Appointment updated successfully:', response.data);
       } else {
         // Create new appointment
         const newAppointment = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Appointments/', newAppointment);
+        const response = await apiClient.post('/Appointments/', newAppointment);
         console.log('New appointment added successfully:', response.data);
       }
 

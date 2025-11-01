@@ -1,7 +1,7 @@
-
 // components/DeleteServiceProvider.tsx
 import React from 'react';
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
+
 
 interface DeleteServiceProviderProps {
   serviceProviderId: number;
@@ -10,8 +10,9 @@ interface DeleteServiceProviderProps {
 const DeleteServiceProvider: React.FC<DeleteServiceProviderProps> = ({ serviceProviderId }) => {
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/ServiceProvider/${serviceProviderId}/`);
+      const response = await apiClient.delete(`/ServiceProvider/${serviceProviderId}/`);
       console.log('Service Provider deleted successfully:', response.data);
+
       // You can perform additional actions after deleting the service provider
     } catch (error) {
       console.error('Error deleting service provider:', error);

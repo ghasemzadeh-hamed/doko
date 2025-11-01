@@ -11,7 +11,7 @@ import EditOutline from 'mdi-material-ui/PencilOutline';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 
 // ** API and Axios Imports
-import axios from 'axios';
+import apiClient from 'src/services/apiClient';
 
 const ServiceComponent = () => {
   // ** State
@@ -25,7 +25,7 @@ const ServiceComponent = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/Service/');
+      const response = await apiClient.get('/Service/');
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -38,7 +38,7 @@ const ServiceComponent = () => {
 
   const handleDelete = async (serviceId) => {
     try {
-      const response = await axios.delete(`http://localhost:8000/Service/${serviceId}/`);
+      const response = await apiClient.delete(`/Service/${serviceId}/`);
       console.log('Service deleted successfully:', response.data);
       fetchServices(); // Fetch services again after deletion
     } catch (error) {
@@ -50,14 +50,14 @@ const ServiceComponent = () => {
     try {
       if (editingService) {
         // Update existing service
-        const response = await axios.put(`http://localhost:8000/Service/${editingService.id}/`, editingService);
+        const response = await apiClient.put(`/Service/${editingService.id}/`, editingService);
         console.log('Service updated successfully:', response.data);
       } else {
         // Create new service
         const newService = {
           // Add other fields as needed
         };
-        const response = await axios.post('http://localhost:8000/Service/', newService);
+        const response = await apiClient.post('/Service/', newService);
         console.log('New service added successfully:', response.data);
       }
 
