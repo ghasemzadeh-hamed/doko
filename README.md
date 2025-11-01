@@ -17,16 +17,50 @@ for lightweight integrations, and a Next.js admin interface based on the Materio
 | `requirements.txt` | Python backend dependencies. |
 | `package.json` | Root-level JavaScript dependencies shared across tooling. |
 
+## Secure quick start
+
+1. Copy the provided example environment file and tailor it to your deployment:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Populate `DJANGO_SECRET_KEY`, configure `DJANGO_ALLOWED_HOSTS`, and set your PostgreSQL, Redis,
+   and frontend variables before running in production. For local development you can keep the
+   defaults or point the settings at a SQLite database by exporting `DJANGO_DB_ENGINE=django.db.backends.sqlite3`.
+2. Create and activate a Python virtual environment and install dependencies via the provided
+   `Makefile` helpers:
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   make install-backend
+   ```
+3. Apply migrations and launch the backend services:
+
+   ```bash
+   make migrate
+   make runserver
+   ```
+
+4. (Optional) Start the FastAPI integration service and the Next.js dashboard in separate shells:
+
+   ```bash
+   make fastapi
+   cd frontend && npm run dev
+   ```
+
+Redis is required when enabling Django Channels or background workers. Provision an instance (for
+example, via Docker or a managed cloud service) and surface its connection string through
+`REDIS_URL`.
+
 ## Backend (Django) quick start
 
-1. **Create and activate a virtual environment** using your preferred tool (e.g. `python -m venv .venv`).
-2. **Install dependencies:** `pip install -r requirements.txt`.
-3. **Run database migrations:** `python manage.py migrate` (SQLite is used by default).
-4. **Create a superuser (optional):** `python manage.py createsuperuser`.
-5. **Start the development server:** `python manage.py runserver`.
-
-The backend enables Django Channels and REST Framework, so make sure Redis or other channel layers
-are configured before deploying to production.
+The backend now defaults to PostgreSQL credentials sourced from environment variables. Production
+deployments **must** set `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, and the `POSTGRES_*` values.
+For development, the `dev` settings module gracefully falls back to SQLite if PostgreSQL variables
+are absent. Use `DJANGO_SETTINGS_MODULE=dokoplatform.settings.prod` when running collectstatic or
+deploying.
 
 ## FastAPI service
 
@@ -53,22 +87,23 @@ point at your running Django/FastAPI instances.
 
 ## Environment variables
 
-The Django settings currently include hard-coded development values. Before deploying, set the
-following environment variables (at a minimum):
+The `.env.example` file documents all supported keys. Key values required for production are:
 
-- `SECRET_KEY`
-- `DEBUG` (set to `False` in production)
-- `ALLOWED_HOSTS`
-- Database connection settings if you are not using SQLite
+- `DJANGO_SECRET_KEY`
+- `DJANGO_ALLOWED_HOSTS`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+- `REDIS_URL` when enabling Channels or task queues
+- `NEXT_PUBLIC_API_BASE_URL` for the frontend build pipeline
 
-For FastAPI/Next.js services, create `.env` files as needed with the credentials required for
-external integrations.
+Set `DJANGO_SETTINGS_MODULE` to `dokoplatform.settings.prod` in production environments so that the
+hardening checks (e.g. `DEBUG=False`, secure cookies, PostgreSQL enforcement) take effect.
 
 ## Running linting and formatting
 
-- Python: integrate tools such as `flake8`, `black`, or `isort` as desired (not yet configured).
-- Frontend: `npm run lint` and `npm run format` leverage ESLint and Prettier configurations
-  included with the template.
+- **Backend:** `make fmt` runs the configured `pre-commit` hooks locally, while `make lint-backend`
+  performs `black --check`, `isort`, and `flake8` validation.
+- **Frontend:** `npm run lint` (also exposed via `make lint-frontend`) executes the ESLint rules and
+  Prettier formatting checks used by CI.
 
 ## Contributing
 

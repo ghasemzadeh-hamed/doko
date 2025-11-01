@@ -1,7 +1,9 @@
-﻿__pycache__/
+__pycache__/
 *.pyc
 .venv/
 .env
+.env.*
+!.env.example
 dist/
 build/
 *.egg-info/
@@ -13,3 +15,5 @@ frontend/.pnp.*
 frontend/.env.local
 frontend/.env
 frontend/.next/
+*.sqlite3
+*.sqlite
