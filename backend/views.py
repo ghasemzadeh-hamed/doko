@@ -1,5 +1,8 @@
 #backend/views.py
-from rest_framework import viewsets
+from django.utils.dateparse import parse_date
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .serializers import *
 
@@ -285,6 +288,103 @@ class LeaveBalanceViewSet(viewsets.ModelViewSet):
 class WorkingHoursViewSet(viewsets.ModelViewSet):
     queryset = WorkingHours.objects.all()
     serializer_class = WorkingHoursSerializer
+
+    def get_queryset(self):
+        queryset = (
+            WorkingHours.objects.select_related("user")
+            .prefetch_related("tag")
+            .order_by("-login_time")
+        )
+
+        request = getattr(self, "request", None)
+        if not request:
+            return queryset
+
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+        user_param = request.query_params.get("user")
+
+        start_date = parse_date(start_date_param) if start_date_param else None
+        end_date = parse_date(end_date_param) if end_date_param else None
+
+        if start_date:
+            queryset = queryset.filter(login_time__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(login_time__date__lte=end_date)
+        if user_param:
+            queryset = queryset.filter(user_id=user_param)
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+
+        start_date = parse_date(start_date_param) if start_date_param else None
+        end_date = parse_date(end_date_param) if end_date_param else None
+
+        if start_date_param and start_date is None:
+            return Response(
+                {"detail": "Invalid start_date format. Use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if end_date_param and end_date is None:
+            return Response(
+                {"detail": "Invalid end_date format. Use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if start_date and end_date and end_date < start_date:
+            return Response(
+                {"detail": "end_date must be greater than or equal to start_date."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return super().list(request, *args, **kwargs)
+
+
+class WorkingHoursSummaryView(APIView):
+    def get(self, request, *args, **kwargs):
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+
+        start_date = parse_date(start_date_param) if start_date_param else None
+        end_date = parse_date(end_date_param) if end_date_param else None
+
+        if start_date_param and start_date is None:
+            return Response(
+                {"detail": "Invalid start_date format. Use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if end_date_param and end_date is None:
+            return Response(
+                {"detail": "Invalid end_date format. Use YYYY-MM-DD."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if start_date and end_date and end_date < start_date:
+            return Response(
+                {"detail": "end_date must be greater than or equal to start_date."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        summary = WorkingHours.summarize(start_date=start_date, end_date=end_date)
+
+        return Response(
+            {
+                "results": summary["rows"],
+                "totals": summary["totals"],
+                "meta": {
+                    "start_date": start_date.isoformat() if start_date else None,
+                    "end_date": end_date.isoformat() if end_date else None,
+                    "standard_daily_hours": float(
+                        WorkingHours.round_hours(WorkingHours.get_standard_daily_hours())
+                    ),
+                },
+            }
+        )
 
 class EmployeeInfoViewSet(viewsets.ModelViewSet):
     queryset = EmployeeInfo.objects.all()
