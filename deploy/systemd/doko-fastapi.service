@@ -1,0 +1,12 @@
+[Unit]
+Description=Doko FastAPI (uvicorn)
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/doko
+ExecStart=/opt/doko/.venv/bin/uvicorn fastapi_app.main:app --host 127.0.0.1 --port 8001
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -41,7 +41,8 @@
     "start": "next start",
     "export": "next export",
     "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "gen:types": "openapi-typescript http://localhost:8000/api/schema/ -o src/types/api.d.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.6.0",
@@ -78,6 +79,7 @@
     "eslint-config-next": "12.0.4",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-alias": "^1.1.2",
+    "openapi-typescript": "^7.4.2",
     "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.25.4",
     "next-transpile-modules": "^9.0.0",

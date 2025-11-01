@@ -10,7 +10,7 @@ jobs:
     name: Lint & compile (Python)
     runs-on: ubuntu-latest
     env:
-      DJANGO_SETTINGS_MODULE: dokoplatform.settings.dev
+      DJANGO_SETTINGS_MODULE: backend.settings.dev
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
