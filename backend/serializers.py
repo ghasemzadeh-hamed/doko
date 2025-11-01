@@ -29,7 +29,7 @@ from backend.pm.pm import *
 from backend.users.models import *
 #from backend.camera.dvr import *
 #from backend.rating.review import Review
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -435,9 +435,89 @@ class LeaveBalanceSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class WorkingHoursSerializer(serializers.ModelSerializer):
+    duration_hours = serializers.SerializerMethodField()
+    overtime_hours = serializers.SerializerMethodField()
+    regular_hours = serializers.SerializerMethodField()
+    regular_cost = serializers.SerializerMethodField()
+    overtime_cost = serializers.SerializerMethodField()
+    total_compensation = serializers.SerializerMethodField()
+    work_date = serializers.SerializerMethodField()
+    user_full_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+
     class Meta:
         model = WorkingHours
-        fields = "__all__"
+        fields = [
+            "id",
+            "user",
+            "user_full_name",
+            "user_email",
+            "login_time",
+            "logout_time",
+            "work_day",
+            "work_date",
+            "duration",
+            "duration_hours",
+            "overtime_hours",
+            "regular_hours",
+            "hourly_rate",
+            "fixed_salary",
+            "regular_cost",
+            "overtime_rate",
+            "overtime_cost",
+            "total_compensation",
+            "tag",
+        ]
+
+    def get_duration_hours(self, obj):
+        hours = getattr(obj, "duration_in_hours", None)
+        if hours is None:
+            return None
+        return float(hours.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_overtime_hours(self, obj):
+        overtime = getattr(obj, "overtime_in_hours", None)
+        if overtime is None:
+            return None
+        return float(overtime.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_regular_hours(self, obj):
+        regular = getattr(obj, "regular_hours", None)
+        if regular is None:
+            return None
+        return float(regular.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_regular_cost(self, obj):
+        cost = getattr(obj, "regular_cost", None)
+        if cost is None:
+            return None
+        return float(cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_overtime_cost(self, obj):
+        cost = getattr(obj, "overtime_cost", None)
+        if cost is None:
+            return None
+        return float(cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_total_compensation(self, obj):
+        total = getattr(obj, "total_compensation", None)
+        if total is None:
+            return None
+        return float(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def get_work_date(self, obj):
+        if obj.login_time:
+            return obj.login_time.date().isoformat()
+        return None
+
+    def get_user_full_name(self, obj):
+        full_name = obj.user.get_full_name()
+        if full_name:
+            return full_name
+        return obj.user.username
+
+    def get_user_email(self, obj):
+        return obj.user.email
 
 class EmployeeInfoSerializer(serializers.ModelSerializer):
     class Meta:

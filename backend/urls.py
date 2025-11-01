@@ -144,5 +144,6 @@ router.register(r'tags', views.TagViewSet, basename='tag')
 
 
 urlpatterns = [
+    path('WorkingHours/summary/', views.WorkingHoursSummaryView.as_view(), name='workinghours-summary'),
     path('', include(router.urls)),
 ]

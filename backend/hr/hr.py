@@ -1,12 +1,13 @@
-from datetime import timedelta, date
+from datetime import datetime, timedelta, date
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from backend.location.address import Address
 from distlib.util import cached_property
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from backend.models import CustomUser, Role, Tag
-from django.db.models.functions import datetime
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.fields import JSONField
@@ -27,10 +28,327 @@ class LeaveBalance(models.Model):
     tag = models.ManyToManyField(Tag, null=True,blank=True)
 
 class WorkingHours(UserLoginLog):
-    duration = models.DateTimeField(null=True , blank=True)
-    def duration (self):
-         duration = self.logout_time - self.login_time
-         pass
+    duration = models.DurationField(null=True, blank=True)
+    work_day = models.DateField(null=True, blank=True, db_index=True)
+    hourly_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+    fixed_salary = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+    overtime_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+
+    HOURS_QUANTIZER = Decimal("0.01")
+    CURRENCY_QUANTIZER = Decimal("0.01")
+
+    def calculate_duration(self):
+        """Return the time spent between login and logout."""
+        if self.login_time and self.logout_time:
+            return self.logout_time - self.login_time
+        return None
+
+    @classmethod
+    def get_standard_daily_hours(cls) -> Decimal:
+        """Return configured standard daily hours or default to 8."""
+        configured = getattr(settings, "HR_STANDARD_DAILY_HOURS", Decimal("8"))
+        try:
+            return Decimal(str(configured))
+        except (InvalidOperation, TypeError, ValueError):
+            return Decimal("8")
+
+    @classmethod
+    def round_hours(cls, value: Decimal) -> Decimal:
+        return value.quantize(cls.HOURS_QUANTIZER, rounding=ROUND_HALF_UP)
+
+    @classmethod
+    def round_currency(cls, value: Decimal) -> Decimal:
+        return value.quantize(cls.CURRENCY_QUANTIZER, rounding=ROUND_HALF_UP)
+
+    @staticmethod
+    def _duration_to_hours(duration: timedelta | None) -> Decimal | None:
+        if duration is None:
+            return None
+        return Decimal(str(duration.total_seconds())) / Decimal("3600")
+
+    @property
+    def duration_in_hours(self) -> Decimal | None:
+        return self._duration_to_hours(self.duration)
+
+    @property
+    def effective_work_day(self) -> date | None:
+        if self.work_day:
+            return self.work_day
+        if self.login_time:
+            return self.login_time.date()
+        return None
+
+    @property
+    def regular_hours(self) -> Decimal | None:
+        duration_hours = self.duration_in_hours
+        if duration_hours is None:
+            return None
+        standard_hours = self.get_standard_daily_hours()
+        if duration_hours <= Decimal("0"):
+            return Decimal("0")
+        regular_hours = min(duration_hours, standard_hours)
+        if regular_hours <= Decimal("0"):
+            return Decimal("0")
+        return regular_hours
+
+    @property
+    def overtime_in_hours(self) -> Decimal | None:
+        hours = self.duration_in_hours
+        if hours is None:
+            return None
+        overtime = hours - self.get_standard_daily_hours()
+        if overtime <= Decimal("0"):
+            return Decimal("0")
+        return overtime
+
+    @property
+    def regular_cost(self) -> Decimal | None:
+        regular_hours = self.regular_hours
+        if regular_hours is None:
+            return None
+        if self.hourly_rate is None:
+            return None
+        return regular_hours * self.hourly_rate
+
+    @property
+    def overtime_cost(self) -> Decimal | None:
+        overtime_hours = self.overtime_in_hours
+        if overtime_hours is None:
+            return None
+        if overtime_hours == Decimal("0"):
+            return Decimal("0")
+        applicable_rate = self.overtime_rate or self.hourly_rate
+        if applicable_rate is None:
+            return None
+        return overtime_hours * applicable_rate
+
+    @property
+    def total_compensation(self) -> Decimal | None:
+        components: list[Decimal] = []
+        if self.fixed_salary is not None:
+            components.append(self.fixed_salary)
+
+        regular_cost = self.regular_cost
+        if regular_cost is not None:
+            components.append(regular_cost)
+
+        overtime_cost = self.overtime_cost
+        if overtime_cost is not None:
+            components.append(overtime_cost)
+
+        if not components:
+            return None
+
+        total = sum(components, Decimal("0"))
+        if total <= Decimal("0"):
+            return Decimal("0")
+        return total
+
+    @staticmethod
+    def _compose_user_name(values: dict) -> str:
+        first_name = (values.get("user__first_name") or "").strip()
+        last_name = (values.get("user__last_name") or "").strip()
+        full_name = f"{first_name} {last_name}".strip()
+        if full_name:
+            return full_name
+        fallback = values.get("user__email")
+        if fallback:
+            return fallback
+        return str(values.get("user"))
+
+    @classmethod
+    def summarize(cls, start_date=None, end_date=None):
+        queryset = cls.objects.select_related("user").order_by("user_id", "login_time")
+
+        if start_date:
+            queryset = queryset.filter(login_time__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(login_time__date__lte=end_date)
+
+        rows: list[dict] = []
+        totals = {
+            "total_hours": Decimal("0"),
+            "expected_hours": Decimal("0"),
+            "overtime_hours": Decimal("0"),
+            "regular_hours": Decimal("0"),
+            "fixed_salary": Decimal("0"),
+            "regular_cost": Decimal("0"),
+            "overtime_cost": Decimal("0"),
+            "total_compensation": Decimal("0"),
+            "workdays": 0,
+        }
+        standard_hours = cls.get_standard_daily_hours()
+
+        user_aggregates: dict[int, dict] = {}
+
+        for entry in queryset:
+            user_id = entry.user_id
+            user_full_name = entry.user.get_full_name().strip()
+            if not user_full_name:
+                user_full_name = (
+                    entry.user.email
+                    or entry.user.username
+                    or str(entry.user_id)
+                )
+            aggregate = user_aggregates.setdefault(
+                user_id,
+                {
+                    "user": user_id,
+                    "user_name": user_full_name,
+                    "user_email": entry.user.email,
+                    "workdays_set": set(),
+                    "total_hours": Decimal("0"),
+                    "regular_hours": Decimal("0"),
+                    "overtime_hours": Decimal("0"),
+                    "fixed_salary": Decimal("0"),
+                    "regular_cost": Decimal("0"),
+                    "overtime_cost": Decimal("0"),
+                    "total_compensation": Decimal("0"),
+                },
+            )
+
+            work_day = entry.effective_work_day
+            if work_day:
+                aggregate["workdays_set"].add(work_day)
+
+            duration_hours = entry.duration_in_hours or Decimal("0")
+            aggregate["total_hours"] += duration_hours
+
+            regular_hours = entry.regular_hours or Decimal("0")
+            aggregate["regular_hours"] += regular_hours
+
+            overtime_hours = entry.overtime_in_hours or Decimal("0")
+            aggregate["overtime_hours"] += overtime_hours
+
+            if entry.fixed_salary is not None:
+                aggregate["fixed_salary"] += entry.fixed_salary
+
+            regular_cost = entry.regular_cost
+            if regular_cost is not None:
+                aggregate["regular_cost"] += regular_cost
+
+            overtime_cost = entry.overtime_cost
+            if overtime_cost is not None:
+                aggregate["overtime_cost"] += overtime_cost
+
+            total_compensation = entry.total_compensation
+            if total_compensation is not None:
+                aggregate["total_compensation"] += total_compensation
+
+        for aggregate in user_aggregates.values():
+            workdays = len(aggregate["workdays_set"])
+            total_hours = aggregate["total_hours"]
+            regular_hours = aggregate["regular_hours"]
+            overtime_hours = aggregate["overtime_hours"]
+            expected_hours = standard_hours * Decimal(workdays)
+            if overtime_hours < Decimal("0"):
+                overtime_hours = Decimal("0")
+
+            rows.append(
+                {
+                    "user": aggregate["user"],
+                    "user_name": aggregate["user_name"],
+                    "user_email": aggregate["user_email"],
+                    "workdays": workdays,
+                    "total_hours": float(cls.round_hours(total_hours)),
+                    "expected_hours": float(cls.round_hours(expected_hours)),
+                    "overtime_hours": float(cls.round_hours(overtime_hours)),
+                    "regular_hours": float(cls.round_hours(regular_hours)),
+                    "fixed_salary": float(
+                        cls.round_currency(aggregate["fixed_salary"])
+                    )
+                    if aggregate["fixed_salary"]
+                    else 0.0,
+                    "regular_cost": float(
+                        cls.round_currency(aggregate["regular_cost"])
+                    )
+                    if aggregate["regular_cost"]
+                    else 0.0,
+                    "overtime_cost": float(
+                        cls.round_currency(aggregate["overtime_cost"])
+                    )
+                    if aggregate["overtime_cost"]
+                    else 0.0,
+                    "total_compensation": float(
+                        cls.round_currency(aggregate["total_compensation"])
+                    )
+                    if aggregate["total_compensation"]
+                    else 0.0,
+                }
+            )
+
+            totals["total_hours"] += total_hours
+            totals["expected_hours"] += expected_hours
+            totals["overtime_hours"] += overtime_hours
+            totals["regular_hours"] += regular_hours
+            totals["fixed_salary"] += aggregate["fixed_salary"]
+            totals["regular_cost"] += aggregate["regular_cost"]
+            totals["overtime_cost"] += aggregate["overtime_cost"]
+            totals["total_compensation"] += aggregate["total_compensation"]
+            totals["workdays"] += workdays
+
+        return {
+            "rows": rows,
+            "totals": {
+                "total_hours": float(cls.round_hours(totals["total_hours"])),
+                "expected_hours": float(cls.round_hours(totals["expected_hours"])),
+                "overtime_hours": float(cls.round_hours(totals["overtime_hours"])),
+                "regular_hours": float(cls.round_hours(totals["regular_hours"])),
+                "fixed_salary": float(
+                    cls.round_currency(totals["fixed_salary"])
+                )
+                if totals["fixed_salary"]
+                else 0.0,
+                "regular_cost": float(
+                    cls.round_currency(totals["regular_cost"])
+                )
+                if totals["regular_cost"]
+                else 0.0,
+                "overtime_cost": float(
+                    cls.round_currency(totals["overtime_cost"])
+                )
+                if totals["overtime_cost"]
+                else 0.0,
+                "total_compensation": float(
+                    cls.round_currency(totals["total_compensation"])
+                )
+                if totals["total_compensation"]
+                else 0.0,
+                "workdays": totals["workdays"],
+                "unique_users": len(rows),
+            },
+        }
+
+    def clean(self):
+        super().clean()
+        if self.login_time and self.logout_time and self.logout_time < self.login_time:
+            raise ValidationError({
+                "logout_time": _("Logout time cannot be earlier than login time."),
+            })
+
+    def save(self, *args, **kwargs):
+        self.duration = self.calculate_duration()
+        if not self.work_day and self.login_time:
+            self.work_day = self.login_time.date()
+        super().save(*args, **kwargs)
 
 class DistanceTraveled(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
