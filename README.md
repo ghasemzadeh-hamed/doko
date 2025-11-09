@@ -54,7 +54,7 @@ Before installing, ensure the following tooling is available:
 Clone the repository and optionally create a Python virtual environment:
 
 ```bash
-git clone https://github.com/ghasemzadeh-hamed/doko.git
+git clone https://github.com/hamedghz/doko.git
 cd doko
 python -m venv .venv
 source .venv/bin/activate
